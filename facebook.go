@@ -4,10 +4,22 @@ import (
 	"encoding/json"
 )
 
-const simulateFacebookAPI = false
+var simulateFacebookAPI = false
+
+// GetSimulateFacebookAPI returns the value of simulateFacebookAPI flag
+func GetSimulateFacebookAPI() bool {
+	return simulateFacebookAPI
+}
+
+// SetSimulateFacebookAPI sets the simulateFacebookAPI flag to indicate whether to run the HTTP API or
+// just simulate an execution
+func SetSimulateFacebookAPI(flag bool) {
+	simulateFacebookAPI = flag
+}
 
 // FacebookGraphResult is the type-safe version of what Facebook API Graph returns
 type FacebookGraphResult struct {
+	Simulated   bool                   `json:"isSimulated"`
 	APIEndpoint string                 `json:"apiEndPoint"`
 	HTTPError   error                  `json:"httpError"`
 	APIError    *FacebookGraphAPIError `json:"error"`
@@ -51,6 +63,7 @@ func (fbgr FacebookGraphResult) IsValid() bool {
 func GetFacebookGraphForURL(url string) (*FacebookGraphResult, error) {
 	result := new(FacebookGraphResult)
 	if simulateFacebookAPI {
+		result.Simulated = true
 		return result, nil
 	}
 	httpRes, httpErr := getHTTPResult("https://graph.facebook.com/?id="+url, HTTPUserAgent, HTTPTimeout)
