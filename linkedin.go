@@ -25,6 +25,14 @@ type LinkedInCountServResult struct {
 	Count       int    `json:"count"`
 }
 
+// IsValid returns true if the LinkedInCountServResult object is valid (did not return LinkedIn error object)
+func (licsr LinkedInCountServResult) IsValid() bool {
+	if licsr.HTTPError == nil {
+		return true
+	}
+	return false
+}
+
 // GetLinkedInShareCountForURL takes a URL to score and returns the LinkedIn share count
 func GetLinkedInShareCountForURL(url string) (*LinkedInCountServResult, error) {
 	result := new(LinkedInCountServResult)
