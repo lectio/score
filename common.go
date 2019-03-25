@@ -4,11 +4,20 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 )
 
+// CuratedLinkScores are the social or other score types associated with curated content
+type CuratedLinkScores interface {
+	Target() url.URL
+	TotalSharesCount() int
+	FacebookGraph() *FacebookGraphResult
+	LinkedInCount() *LinkedInCountServResult
+}
+
 // HTTPUserAgent may be passed into getHTTPResult as the default HTTP User-Agent header parameter
-const HTTPUserAgent = "github.com/lectio/score_facebook"
+const HTTPUserAgent = "github.com/lectio/score"
 
 // HTTPTimeout may be passed into getHTTPResult function as the default HTTP timeout parameter
 const HTTPTimeout = time.Second * 90

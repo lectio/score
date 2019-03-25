@@ -2,6 +2,7 @@ package score
 
 import (
 	"encoding/json"
+	"net/url"
 )
 
 var simulateLinkedInAPI = false
@@ -33,8 +34,8 @@ func (licsr LinkedInCountServResult) IsValid() bool {
 	return false
 }
 
-// GetLinkedInShareCountForURL takes a URL to score and returns the LinkedIn share count
-func GetLinkedInShareCountForURL(url string) (*LinkedInCountServResult, error) {
+// GetLinkedInShareCountForURLText takes a text URL to score and returns the LinkedIn share count
+func GetLinkedInShareCountForURLText(url string) (*LinkedInCountServResult, error) {
 	result := new(LinkedInCountServResult)
 	if simulateLinkedInAPI {
 		result.Simulated = true
@@ -48,4 +49,9 @@ func GetLinkedInShareCountForURL(url string) (*LinkedInCountServResult, error) {
 	}
 	json.Unmarshal(*httpRes.body, result)
 	return result, nil
+}
+
+// GetLinkedInShareCountForURL takes a URL to score and returns the LinkedIn share count
+func GetLinkedInShareCountForURL(url *url.URL) (*LinkedInCountServResult, error) {
+	return GetLinkedInShareCountForURLText(url.String())
 }

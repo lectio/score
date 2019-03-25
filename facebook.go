@@ -2,6 +2,7 @@ package score
 
 import (
 	"encoding/json"
+	"net/url"
 )
 
 var simulateFacebookAPI = false
@@ -59,8 +60,8 @@ func (fbgr FacebookGraphResult) IsValid() bool {
 	return false
 }
 
-// GetFacebookGraphForURL takes a URL to score and returns the Facebook graph (and share counts)
-func GetFacebookGraphForURL(url string) (*FacebookGraphResult, error) {
+// GetFacebookGraphForURLText takes a text URL to score and returns the Facebook graph (and share counts)
+func GetFacebookGraphForURLText(url string) (*FacebookGraphResult, error) {
 	result := new(FacebookGraphResult)
 	if simulateFacebookAPI {
 		result.Simulated = true
@@ -74,4 +75,9 @@ func GetFacebookGraphForURL(url string) (*FacebookGraphResult, error) {
 	}
 	json.Unmarshal(*httpRes.body, result)
 	return result, nil
+}
+
+// GetFacebookGraphForURL takes a URL to score and returns the Facebook graph (and share counts)
+func GetFacebookGraphForURL(url *url.URL) (*FacebookGraphResult, error) {
+	return GetFacebookGraphForURLText(url.String())
 }
