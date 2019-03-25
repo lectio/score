@@ -5,18 +5,11 @@ import (
 	"net/url"
 )
 
-var simulateFacebookAPI = false
+// SimulateFacebookAPI is passed into GetFacebookGraphForURL* if we want to simulate the API
+const SimulateFacebookAPI = true
 
-// GetSimulateFacebookAPI returns the value of simulateFacebookAPI flag
-func GetSimulateFacebookAPI() bool {
-	return simulateFacebookAPI
-}
-
-// SetSimulateFacebookAPI sets the simulateFacebookAPI flag to indicate whether to run the HTTP API or
-// just simulate an execution
-func SetSimulateFacebookAPI(flag bool) {
-	simulateFacebookAPI = flag
-}
+// UseFacebookAPI is passed into GetFacebookGraphForURL* if we don't want to simulate the API, but actually run it
+const UseFacebookAPI = false
 
 // FacebookGraphResult is the type-safe version of what Facebook API Graph returns
 type FacebookGraphResult struct {
@@ -61,10 +54,10 @@ func (fbgr FacebookGraphResult) IsValid() bool {
 }
 
 // GetFacebookGraphForURLText takes a text URL to score and returns the Facebook graph (and share counts)
-func GetFacebookGraphForURLText(url string) (*FacebookGraphResult, error) {
+func GetFacebookGraphForURLText(url string, simulateFacebookAPI bool) (*FacebookGraphResult, error) {
 	result := new(FacebookGraphResult)
 	if simulateFacebookAPI {
-		result.Simulated = true
+		result.Simulated = simulateFacebookAPI
 		return result, nil
 	}
 	httpRes, httpErr := getHTTPResult("https://graph.facebook.com/?id="+url, HTTPUserAgent, HTTPTimeout)
@@ -78,6 +71,6 @@ func GetFacebookGraphForURLText(url string) (*FacebookGraphResult, error) {
 }
 
 // GetFacebookGraphForURL takes a URL to score and returns the Facebook graph (and share counts)
-func GetFacebookGraphForURL(url *url.URL) (*FacebookGraphResult, error) {
-	return GetFacebookGraphForURLText(url.String())
+func GetFacebookGraphForURL(url *url.URL, simulateFacebookAPI bool) (*FacebookGraphResult, error) {
+	return GetFacebookGraphForURLText(url.String(), simulateFacebookAPI)
 }

@@ -5,18 +5,11 @@ import (
 	"net/url"
 )
 
-var simulateLinkedInAPI = false
+// SimulateLinkedInAPI is passed into GetLinkedInShareCountForURL* if we want to simulate the API
+const SimulateLinkedInAPI = true
 
-// GetSimulateLinkedInAPI returns the value of simulateLinkedInAPI flag
-func GetSimulateLinkedInAPI() bool {
-	return simulateLinkedInAPI
-}
-
-// SetSimulateLinkedInAPI sets the simulateLinkedInAPI flag to indicate whether to run the HTTP API or
-// just simulate an execution
-func SetSimulateLinkedInAPI(flag bool) {
-	simulateLinkedInAPI = flag
-}
+// UseLinkedInAPI is passed into GetLinkedInShareCountForURL* if we don't want to simulate the API, but actually run it
+const UseLinkedInAPI = false
 
 // LinkedInCountServResult is the type-safe version of what LinkedIn's share count API returns
 type LinkedInCountServResult struct {
@@ -35,7 +28,7 @@ func (licsr LinkedInCountServResult) IsValid() bool {
 }
 
 // GetLinkedInShareCountForURLText takes a text URL to score and returns the LinkedIn share count
-func GetLinkedInShareCountForURLText(url string) (*LinkedInCountServResult, error) {
+func GetLinkedInShareCountForURLText(url string, simulateLinkedInAPI bool) (*LinkedInCountServResult, error) {
 	result := new(LinkedInCountServResult)
 	if simulateLinkedInAPI {
 		result.Simulated = true
@@ -52,6 +45,6 @@ func GetLinkedInShareCountForURLText(url string) (*LinkedInCountServResult, erro
 }
 
 // GetLinkedInShareCountForURL takes a URL to score and returns the LinkedIn share count
-func GetLinkedInShareCountForURL(url *url.URL) (*LinkedInCountServResult, error) {
-	return GetLinkedInShareCountForURLText(url.String())
+func GetLinkedInShareCountForURL(url *url.URL, simulateLinkedInAPI bool) (*LinkedInCountServResult, error) {
+	return GetLinkedInShareCountForURLText(url.String(), simulateLinkedInAPI)
 }

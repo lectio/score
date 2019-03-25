@@ -64,12 +64,12 @@ type defaultCuratedLinkScores struct {
 	linkedInGraph    *LinkedInCountServResult
 }
 
-func (d *defaultCuratedLinkScores) init(url *url.URL, initialTotalCount int) {
+func (d *defaultCuratedLinkScores) init(url *url.URL, initialTotalCount int, simulateAPIs bool) {
 	d.url = url
 	d.totalSharesCount = initialTotalCount
 
-	d.facebookGraph, _ = GetFacebookGraphForURL(url)
-	d.linkedInGraph, _ = GetLinkedInShareCountForURL(url)
+	d.facebookGraph, _ = GetFacebookGraphForURL(url, simulateAPIs)
+	d.linkedInGraph, _ = GetLinkedInShareCountForURL(url, simulateAPIs)
 
 	if d.facebookGraph.IsValid() && d.facebookGraph != nil && d.facebookGraph.Shares != nil && d.facebookGraph.Shares.ShareCount > 0 {
 		d.totalSharesCount = d.facebookGraph.Shares.ShareCount
@@ -100,8 +100,8 @@ func (d defaultCuratedLinkScores) LinkedInCount() *LinkedInCountServResult {
 }
 
 // GetLinkScores computes and return social scores for a curated link
-func GetLinkScores(url *url.URL, initialTotalCount int) LinkScores {
+func GetLinkScores(url *url.URL, initialTotalCount int, simulateAPIs bool) LinkScores {
 	result := new(defaultCuratedLinkScores)
-	result.init(url, initialTotalCount)
+	result.init(url, initialTotalCount, simulateAPIs)
 	return result
 }
