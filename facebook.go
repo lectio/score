@@ -2,6 +2,7 @@ package score
 
 import (
 	"encoding/json"
+	"errors"
 	"net/url"
 )
 
@@ -72,5 +73,8 @@ func GetFacebookGraphForURLText(url string, simulateFacebookAPI bool) (*Facebook
 
 // GetFacebookGraphForURL takes a URL to score and returns the Facebook graph (and share counts)
 func GetFacebookGraphForURL(url *url.URL, simulateFacebookAPI bool) (*FacebookGraphResult, error) {
+	if url == nil {
+		return nil, errors.New("Null URL passed to GetFacebookGraphForURL")
+	}
 	return GetFacebookGraphForURLText(url.String(), simulateFacebookAPI)
 }

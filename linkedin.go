@@ -2,6 +2,7 @@ package score
 
 import (
 	"encoding/json"
+	"errors"
 	"net/url"
 )
 
@@ -46,5 +47,8 @@ func GetLinkedInShareCountForURLText(url string, simulateLinkedInAPI bool) (*Lin
 
 // GetLinkedInShareCountForURL takes a URL to score and returns the LinkedIn share count
 func GetLinkedInShareCountForURL(url *url.URL, simulateLinkedInAPI bool) (*LinkedInCountServResult, error) {
+	if url == nil {
+		return nil, errors.New("Null URL passed to GetFacebookGraphForURL")
+	}
 	return GetLinkedInShareCountForURLText(url.String(), simulateLinkedInAPI)
 }

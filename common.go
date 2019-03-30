@@ -68,13 +68,14 @@ func (d *defaultCuratedLinkScores) init(url *url.URL, initialTotalCount int, sim
 	d.url = url
 	d.totalSharesCount = initialTotalCount
 
-	d.facebookGraph, _ = GetFacebookGraphForURL(url, simulateAPIs)
-	d.linkedInGraph, _ = GetLinkedInShareCountForURL(url, simulateAPIs)
+	var fbErr, liErr error
+	d.facebookGraph, fbErr = GetFacebookGraphForURL(url, simulateAPIs)
+	d.linkedInGraph, liErr = GetLinkedInShareCountForURL(url, simulateAPIs)
 
-	if d.facebookGraph.IsValid() && d.facebookGraph != nil && d.facebookGraph.Shares != nil && d.facebookGraph.Shares.ShareCount > 0 {
+	if fbErr == nil && d.facebookGraph.IsValid() && d.facebookGraph != nil && d.facebookGraph.Shares != nil && d.facebookGraph.Shares.ShareCount > 0 {
 		d.totalSharesCount = d.facebookGraph.Shares.ShareCount
 	}
-	if d.linkedInGraph.IsValid() && d.linkedInGraph != nil && d.linkedInGraph.Count > 0 {
+	if liErr == nil && d.linkedInGraph.IsValid() && d.linkedInGraph != nil && d.linkedInGraph.Count > 0 {
 		if d.totalSharesCount == -1 {
 			d.totalSharesCount = d.linkedInGraph.Count
 		} else {
