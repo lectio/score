@@ -19,6 +19,7 @@ type LinkScores interface {
 
 // LinkScorer instances score a given link (by running an API or other computation)
 type LinkScorer interface {
+	Names() (string, string)
 	TargetURL() string
 	IsValid() bool
 	SharesCount() int

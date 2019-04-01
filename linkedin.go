@@ -23,6 +23,11 @@ type LinkedInLinkScoreResult struct {
 	Count             int    `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
 }
 
+// Names returns the identities of the scorer
+func (li LinkedInLinkScoreResult) Names() (string, string) {
+	return "facebook", "Facebook"
+}
+
 // TargetURL is the URL that the scores were computed for
 func (li LinkedInLinkScoreResult) TargetURL() string {
 	return li.URL

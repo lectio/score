@@ -26,6 +26,11 @@ type FacebookLinkScoreGraphResult struct {
 	OpenGraph         *FacebookGraphOGObject `json:"og_object"`             // direct mapping to Facebook API result via Unmarshal httpRes.Body
 }
 
+// Names returns the identities of the scorer
+func (fb FacebookLinkScoreGraphResult) Names() (string, string) {
+	return "facebook", "Facebook"
+}
+
 // TargetURL is the URL that the scores were computed for
 func (fb FacebookLinkScoreGraphResult) TargetURL() string {
 	return fb.URL
