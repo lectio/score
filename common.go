@@ -13,8 +13,8 @@ type LinkScores interface {
 	TargetURL() *url.URL
 	TargetGloballyUniqueKey() string
 	TotalSharesCount() int
-	FacebookGraph() *FacebookLinkScoreGraphResult
-	LinkedInCount() *LinkedInLinkScoreResult
+	FacebookLinkScore() *FacebookLinkScoreGraphResult
+	LinkedInLinkScore() *LinkedInLinkScoreResult
 }
 
 // DefaultInitialTotalSharesCount is the default value for shares count.
@@ -101,11 +101,11 @@ func (d defaultCuratedLinkScores) TotalSharesCount() int {
 	return d.totalSharesCount
 }
 
-func (d defaultCuratedLinkScores) FacebookGraph() *FacebookLinkScoreGraphResult {
+func (d defaultCuratedLinkScores) FacebookLinkScore() *FacebookLinkScoreGraphResult {
 	return d.facebookLinkScore
 }
 
-func (d defaultCuratedLinkScores) LinkedInCount() *LinkedInLinkScoreResult {
+func (d defaultCuratedLinkScores) LinkedInLinkScore() *LinkedInLinkScoreResult {
 	return d.linkedInLinkScore
 }
 
