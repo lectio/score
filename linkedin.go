@@ -12,16 +12,18 @@ const SimulateLinkedInAPI = true
 // UseLinkedInAPI is passed into GetLinkedInShareCountForURL* if we don't want to simulate the API, but actually run it
 const UseLinkedInAPI = false
 
-// LinkedInCountServResult is the type-safe version of what LinkedIn's share count API returns
-type LinkedInCountServResult struct {
-	Simulated   bool   `json:"isSimulated"`
-	APIEndpoint string `json:"apiEndPoint"`
-	HTTPError   error  `json:"httpError"`
-	Count       int    `json:"count"`
+// LinkedInLinkScoreResult is the type-safe version of what LinkedIn's share count API returns
+type LinkedInLinkScoreResult struct {
+	Simulated         bool   `json:"isSimulated"`
+	URL               string `json:"url"`
+	GloballyUniqueKey string `json:"uniqueKey"`
+	APIEndpoint       string `json:"apiEndPoint"`
+	HTTPError         error  `json:"httpError"`
+	Count             int    `json:"count"`
 }
 
-// IsValid returns true if the LinkedInCountServResult object is valid (did not return LinkedIn error object)
-func (licsr LinkedInCountServResult) IsValid() bool {
+// IsValid returns true if the LinkedInLinkScoreResult object is valid (did not return LinkedIn error object)
+func (licsr LinkedInLinkScoreResult) IsValid() bool {
 	if licsr.HTTPError == nil {
 		return true
 	}
@@ -29,13 +31,17 @@ func (licsr LinkedInCountServResult) IsValid() bool {
 }
 
 // GetLinkedInShareCountForURLText takes a text URL to score and returns the LinkedIn share count
-func GetLinkedInShareCountForURLText(url string, simulateLinkedInAPI bool) (*LinkedInCountServResult, error) {
-	result := new(LinkedInCountServResult)
+func GetLinkedInShareCountForURLText(url string, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScoreResult, error) {
+	apiEndpoint := "https://www.linkedin.com/countserv/count/share?format=json&url=" + url
+	result := new(LinkedInLinkScoreResult)
+	result.URL = url
+	result.APIEndpoint = apiEndpoint
+	result.GloballyUniqueKey = globallyUniqueKey
 	if simulateLinkedInAPI {
 		result.Simulated = true
 		return result, nil
 	}
-	httpRes, httpErr := getHTTPResult("https://www.linkedin.com/countserv/count/share?format=json&url="+url, HTTPUserAgent, HTTPTimeout)
+	httpRes, httpErr := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)
 	result.APIEndpoint = httpRes.apiEndpoint
 	result.HTTPError = httpErr
 	if httpErr != nil {
@@ -46,9 +52,9 @@ func GetLinkedInShareCountForURLText(url string, simulateLinkedInAPI bool) (*Lin
 }
 
 // GetLinkedInShareCountForURL takes a URL to score and returns the LinkedIn share count
-func GetLinkedInShareCountForURL(url *url.URL, simulateLinkedInAPI bool) (*LinkedInCountServResult, error) {
+func GetLinkedInShareCountForURL(url *url.URL, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScoreResult, error) {
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetFacebookGraphForURL")
 	}
-	return GetLinkedInShareCountForURLText(url.String(), simulateLinkedInAPI)
+	return GetLinkedInShareCountForURLText(url.String(), globallyUniqueKey, simulateLinkedInAPI)
 }
