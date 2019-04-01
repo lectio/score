@@ -26,6 +26,35 @@ type FacebookLinkScoreGraphResult struct {
 	OpenGraph         *FacebookGraphOGObject `json:"og_object"`             // direct mapping to Facebook API result via Unmarshal httpRes.Body
 }
 
+// TargetURL is the URL that the scores were computed for
+func (fb FacebookLinkScoreGraphResult) TargetURL() string {
+	return fb.URL
+}
+
+// IsValid returns true if the FacebookLinkScoreGraphResult object is valid (did not return Facebook error object)
+func (fb FacebookLinkScoreGraphResult) IsValid() bool {
+	if fb.HTTPError == nil && fb.APIError == nil {
+		return true
+	}
+	return false
+}
+
+// SharesCount is the count of how many times the given URL was shared by this scorer, -1 if invalid or not available
+func (fb FacebookLinkScoreGraphResult) SharesCount() int {
+	if fb.IsValid() && fb.Shares != nil {
+		return fb.Shares.ShareCount
+	}
+	return -1
+}
+
+// CommentsCount is the count of how many times the given URL was commented on, -1 if invalid or not available
+func (fb FacebookLinkScoreGraphResult) CommentsCount() int {
+	if fb.IsValid() && fb.Shares != nil {
+		return fb.Shares.CommentCount
+	}
+	return -1
+}
+
 // FacebookGraphAPIError is the type-safe version of a Facebook API Graph error (e.g. rate limiting)
 type FacebookGraphAPIError struct {
 	Message   string `json:"message"`
@@ -47,14 +76,6 @@ type FacebookGraphOGObject struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Type        string `json:"type"`
-}
-
-// IsValid returns true if the FacebookLinkScoreGraphResult object is valid (did not return Facebook error object)
-func (fbgr FacebookLinkScoreGraphResult) IsValid() bool {
-	if fbgr.HTTPError == nil && fbgr.APIError == nil {
-		return true
-	}
-	return false
 }
 
 // GetFacebookGraphForURLText takes a text URL to score and returns the Facebook graph (and share counts)

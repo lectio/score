@@ -17,6 +17,14 @@ type LinkScores interface {
 	LinkedInLinkScore() *LinkedInLinkScoreResult
 }
 
+// LinkScorer instances score a given link (by running an API or other computation)
+type LinkScorer interface {
+	TargetURL() string
+	IsValid() bool
+	SharesCount() int
+	CommentsCount() int
+}
+
 // DefaultInitialTotalSharesCount is the default value for shares count.
 // This allows to distinguish whether something was computed or if there was an error.
 const DefaultInitialTotalSharesCount = -1

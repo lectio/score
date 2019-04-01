@@ -23,12 +23,30 @@ type LinkedInLinkScoreResult struct {
 	Count             int    `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
 }
 
+// TargetURL is the URL that the scores were computed for
+func (li LinkedInLinkScoreResult) TargetURL() string {
+	return li.URL
+}
+
 // IsValid returns true if the LinkedInLinkScoreResult object is valid (did not return LinkedIn error object)
-func (licsr LinkedInLinkScoreResult) IsValid() bool {
-	if licsr.HTTPError == nil {
+func (li LinkedInLinkScoreResult) IsValid() bool {
+	if li.HTTPError == nil {
 		return true
 	}
 	return false
+}
+
+// SharesCount is the count of how many times the given URL was shared by this scorer, -1 if invalid or not available
+func (li LinkedInLinkScoreResult) SharesCount() int {
+	if li.IsValid() {
+		return li.Count
+	}
+	return -1
+}
+
+// CommentsCount is the count of how many times the given URL was commented on, -1 if invalid or not available
+func (li LinkedInLinkScoreResult) CommentsCount() int {
+	return -1
 }
 
 // GetLinkedInShareCountForURLText takes a text URL to score and returns the LinkedIn share count
