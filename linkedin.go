@@ -25,7 +25,7 @@ type LinkedInLinkScoreResult struct {
 
 // Names returns the identities of the scorer
 func (li LinkedInLinkScoreResult) Names() (string, string) {
-	return "facebook", "Facebook"
+	return "linkedin", "LinkedIn"
 }
 
 // TargetURL is the URL that the scores were computed for
