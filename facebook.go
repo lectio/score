@@ -15,15 +15,15 @@ const UseFacebookAPI = false
 
 // FacebookLinkScoreGraphResult is the type-safe version of what Facebook API Graph returns
 type FacebookLinkScoreGraphResult struct {
-	Simulated         bool                   `json:"isSimulated"`
-	URL               string                 `json:"url"`
-	GloballyUniqueKey string                 `json:"uniqueKey"`
-	APIEndpoint       string                 `json:"apiEndPoint"`
-	HTTPError         error                  `json:"httpError"`
-	APIError          *FacebookGraphAPIError `json:"error"`
-	ID                string                 `json:"id"`
-	Shares            *FacebookGraphShares   `json:"share"`
-	OpenGraph         *FacebookGraphOGObject `json:"og_object"`
+	Simulated         bool                   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
+	URL               string                 `json:"url"`                   // part of lectio.score
+	GloballyUniqueKey string                 `json:"uniqueKey"`             // part of lectio.score
+	APIEndpoint       string                 `json:"apiEndPoint"`           // part of lectio.score
+	HTTPError         error                  `json:"httpError,omitempty"`   // part of lectio.score
+	APIError          *FacebookGraphAPIError `json:"error,omitempty"`       // direct mapping to Facebook API result via Unmarshal httpRes.Body
+	ID                string                 `json:"id"`                    // direct mapping to Facebook API result via Unmarshal httpRes.Body
+	Shares            *FacebookGraphShares   `json:"share"`                 // direct mapping to Facebook API result via Unmarshal httpRes.Body
+	OpenGraph         *FacebookGraphOGObject `json:"og_object"`             // direct mapping to Facebook API result via Unmarshal httpRes.Body
 }
 
 // FacebookGraphAPIError is the type-safe version of a Facebook API Graph error (e.g. rate limiting)

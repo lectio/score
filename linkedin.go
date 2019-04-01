@@ -15,12 +15,12 @@ const UseLinkedInAPI = false
 
 // LinkedInLinkScoreResult is the type-safe version of what LinkedIn's share count API returns
 type LinkedInLinkScoreResult struct {
-	Simulated         bool   `json:"isSimulated"`
-	URL               string `json:"url"`
-	GloballyUniqueKey string `json:"uniqueKey"`
-	APIEndpoint       string `json:"apiEndPoint"`
-	HTTPError         error  `json:"httpError"`
-	Count             int    `json:"count"`
+	Simulated         bool   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
+	URL               string `json:"url"`                   // part of lectio.score
+	GloballyUniqueKey string `json:"uniqueKey"`             // part of lectio.score
+	APIEndpoint       string `json:"apiEndPoint"`           // part of lectio.score
+	HTTPError         error  `json:"httpError,omitempty"`   // part of lectio.score
+	Count             int    `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
 }
 
 // IsValid returns true if the LinkedInLinkScoreResult object is valid (did not return LinkedIn error object)
