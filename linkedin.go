@@ -40,7 +40,7 @@ func GetLinkedInShareCountForURLText(url string, globallyUniqueKey string, simul
 	result.GloballyUniqueKey = globallyUniqueKey
 	if simulateLinkedInAPI {
 		result.Simulated = true
-		result.Count = rand.Intn(8750)
+		result.Count = rand.Intn(50)
 		return result, nil
 	}
 	httpRes, httpErr := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)

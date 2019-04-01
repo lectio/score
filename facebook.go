@@ -67,8 +67,8 @@ func GetFacebookGraphForURLText(url string, globallyUniqueKey string, simulateFa
 	if simulateFacebookAPI {
 		result.Simulated = simulateFacebookAPI
 		result.Shares = new(FacebookGraphShares)
-		result.Shares.ShareCount = rand.Intn(8750)
-		result.Shares.CommentCount = rand.Intn(5790)
+		result.Shares.ShareCount = rand.Intn(750)
+		result.Shares.CommentCount = rand.Intn(2500)
 		return result, nil
 	}
 	httpRes, httpErr := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)
