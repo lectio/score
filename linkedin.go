@@ -3,6 +3,7 @@ package score
 import (
 	"encoding/json"
 	"errors"
+	"math/rand"
 	"net/url"
 )
 
@@ -39,6 +40,7 @@ func GetLinkedInShareCountForURLText(url string, globallyUniqueKey string, simul
 	result.GloballyUniqueKey = globallyUniqueKey
 	if simulateLinkedInAPI {
 		result.Simulated = true
+		result.Count = rand.Intn(8750)
 		return result, nil
 	}
 	httpRes, httpErr := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)

@@ -3,6 +3,7 @@ package score
 import (
 	"encoding/json"
 	"errors"
+	"math/rand"
 	"net/url"
 )
 
@@ -65,6 +66,9 @@ func GetFacebookGraphForURLText(url string, globallyUniqueKey string, simulateFa
 	result.GloballyUniqueKey = globallyUniqueKey
 	if simulateFacebookAPI {
 		result.Simulated = simulateFacebookAPI
+		result.Shares = new(FacebookGraphShares)
+		result.Shares.ShareCount = rand.Intn(8750)
+		result.Shares.CommentCount = rand.Intn(5790)
 		return result, nil
 	}
 	httpRes, httpErr := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)
