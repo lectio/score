@@ -65,25 +65,25 @@ func getHTTPResult(apiEndpoint string, userAgent string, timeout time.Duration) 
 }
 
 type defaultLinkScorerIdentity struct {
-	machineName string
-	humanName   string
+	ForMachines string `json:"machineName"`
+	ForHumans   string `json:"humanName"`
 }
 
 func makeDefaultLinkScorerIdentity(machineName string, humanName string) *defaultLinkScorerIdentity {
 	result := new(defaultLinkScorerIdentity)
-	result.machineName = machineName
-	result.humanName = humanName
+	result.ForMachines = machineName
+	result.ForHumans = humanName
 	return result
 }
 
 // MachineName is usually lowercase identifer useful for machine processing
 func (i defaultLinkScorerIdentity) MachineName() string {
-	return i.machineName
+	return i.ForMachines
 }
 
 // HumanName can be any meaningful human identifer
 func (i defaultLinkScorerIdentity) HumanName() string {
-	return i.humanName
+	return i.ForHumans
 }
 
 // FileName creates the name of this file for file storage
