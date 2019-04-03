@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"time"
 )
 
 // LinkScorerIdentity uniquely identifies the link scoring engine (the "scorer")
 type LinkScorerIdentity interface {
-	MachineName() string                            // usually lowercase identifer useful for machine processing
-	HumanName() string                              // can be any meaningful human identifer
-	FileName(path string, scores LinkScores) string // create the name of this file for file storage
+	MachineName() string // usually lowercase identifer useful for machine processing
+	HumanName() string   // can be any meaningful human identifer
 }
 
 // LinkScores instances score a given link (by running an API or other computation)
@@ -23,7 +21,6 @@ type LinkScores interface {
 	IsValid() bool
 	SharesCount() int
 	CommentsCount() int
-	FileName(path string) string
 }
 
 // HTTPUserAgent may be passed into getHTTPResult as the default HTTP User-Agent header parameter
@@ -84,13 +81,4 @@ func (i defaultLinkScorerIdentity) MachineName() string {
 // HumanName can be any meaningful human identifer
 func (i defaultLinkScorerIdentity) HumanName() string {
 	return i.ForHumans
-}
-
-// FileName creates the name of this file for file storage
-func (i defaultLinkScorerIdentity) FileName(path string, scores LinkScores) string {
-	suffix := i.MachineName()
-	if !scores.IsValid() {
-		suffix = suffix + "-error"
-	}
-	return fmt.Sprintf("%s.%s.json", filepath.Join(path, scores.TargetURLUniqueKey()), suffix)
 }

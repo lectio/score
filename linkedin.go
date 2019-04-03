@@ -60,11 +60,6 @@ func (li LinkedInLinkScores) CommentsCount() int {
 	return -1
 }
 
-// FileName returns the name of this scorer's data file in the given path
-func (li LinkedInLinkScores) FileName(path string) string {
-	return li.ScorerIdentity.FileName(path, li)
-}
-
 // GetLinkedInLinkScoresForURLText takes a text URL to score and returns the LinkedIn share count
 func GetLinkedInLinkScoresForURLText(url string, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
 	apiEndpoint := "https://www.linkedin.com/countserv/count/share?format=json&url=" + url
