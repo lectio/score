@@ -13,8 +13,8 @@ const SimulateFacebookAPI = true
 // UseFacebookAPI is passed into GetFacebookGraphForURL* if we don't want to simulate the API, but actually run it
 const UseFacebookAPI = false
 
-// FacebookLinkScoreGraphResult is the type-safe version of what Facebook API Graph returns
-type FacebookLinkScoreGraphResult struct {
+// FacebookLinkScores is the type-safe version of what Facebook API Graph returns
+type FacebookLinkScores struct {
 	Simulated         bool                   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
 	URL               string                 `json:"url"`                   // part of lectio.score
 	GloballyUniqueKey string                 `json:"uniqueKey"`             // part of lectio.score
@@ -27,17 +27,17 @@ type FacebookLinkScoreGraphResult struct {
 }
 
 // Names returns the identities of the scorer
-func (fb FacebookLinkScoreGraphResult) Names() (string, string) {
+func (fb FacebookLinkScores) Names() (string, string) {
 	return "facebook", "Facebook"
 }
 
 // TargetURL is the URL that the scores were computed for
-func (fb FacebookLinkScoreGraphResult) TargetURL() string {
+func (fb FacebookLinkScores) TargetURL() string {
 	return fb.URL
 }
 
-// IsValid returns true if the FacebookLinkScoreGraphResult object is valid (did not return Facebook error object)
-func (fb FacebookLinkScoreGraphResult) IsValid() bool {
+// IsValid returns true if the FacebookLinkScores object is valid (did not return Facebook error object)
+func (fb FacebookLinkScores) IsValid() bool {
 	if fb.HTTPError == nil && fb.APIError == nil {
 		return true
 	}
@@ -45,7 +45,7 @@ func (fb FacebookLinkScoreGraphResult) IsValid() bool {
 }
 
 // SharesCount is the count of how many times the given URL was shared by this scorer, -1 if invalid or not available
-func (fb FacebookLinkScoreGraphResult) SharesCount() int {
+func (fb FacebookLinkScores) SharesCount() int {
 	if fb.IsValid() && fb.Shares != nil {
 		return fb.Shares.ShareCount
 	}
@@ -53,7 +53,7 @@ func (fb FacebookLinkScoreGraphResult) SharesCount() int {
 }
 
 // CommentsCount is the count of how many times the given URL was commented on, -1 if invalid or not available
-func (fb FacebookLinkScoreGraphResult) CommentsCount() int {
+func (fb FacebookLinkScores) CommentsCount() int {
 	if fb.IsValid() && fb.Shares != nil {
 		return fb.Shares.CommentCount
 	}
@@ -83,10 +83,10 @@ type FacebookGraphOGObject struct {
 	Type        string `json:"type"`
 }
 
-// GetFacebookGraphForURLText takes a text URL to score and returns the Facebook graph (and share counts)
-func GetFacebookGraphForURLText(url string, globallyUniqueKey string, simulateFacebookAPI bool) (*FacebookLinkScoreGraphResult, error) {
+// GetFacebookLinkScoresForURLText takes a text URL to score and returns the Facebook graph (and share counts)
+func GetFacebookLinkScoresForURLText(url string, globallyUniqueKey string, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
 	apiEndpoint := "https://graph.facebook.com/?id=" + url
-	result := new(FacebookLinkScoreGraphResult)
+	result := new(FacebookLinkScores)
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
 	result.GloballyUniqueKey = globallyUniqueKey
@@ -107,10 +107,10 @@ func GetFacebookGraphForURLText(url string, globallyUniqueKey string, simulateFa
 	return result, nil
 }
 
-// GetFacebookGraphForURL takes a URL to score and returns the Facebook graph (and share counts)
-func GetFacebookGraphForURL(url *url.URL, globallyUniqueKey string, simulateFacebookAPI bool) (*FacebookLinkScoreGraphResult, error) {
+// GetFacebookLinkScorerForURL takes a URL to score and returns the Facebook graph (and share counts)
+func GetFacebookLinkScoresForURL(url *url.URL, globallyUniqueKey string, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
 	if url == nil {
-		return nil, errors.New("Null URL passed to GetFacebookGraphForURL")
+		return nil, errors.New("Null URL passed to GetFacebookLinkScoresForURL")
 	}
-	return GetFacebookGraphForURLText(url.String(), globallyUniqueKey, simulateFacebookAPI)
+	return GetFacebookLinkScoresForURLText(url.String(), globallyUniqueKey, simulateFacebookAPI)
 }

@@ -13,8 +13,8 @@ const SimulateLinkedInAPI = true
 // UseLinkedInAPI is passed into GetLinkedInShareCountForURL* if we don't want to simulate the API, but actually run it
 const UseLinkedInAPI = false
 
-// LinkedInLinkScoreResult is the type-safe version of what LinkedIn's share count API returns
-type LinkedInLinkScoreResult struct {
+// LinkedInLinkScores is the type-safe version of what LinkedIn's share count API returns
+type LinkedInLinkScores struct {
 	Simulated         bool   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
 	URL               string `json:"url"`                   // part of lectio.score
 	GloballyUniqueKey string `json:"uniqueKey"`             // part of lectio.score
@@ -24,17 +24,17 @@ type LinkedInLinkScoreResult struct {
 }
 
 // Names returns the identities of the scorer
-func (li LinkedInLinkScoreResult) Names() (string, string) {
+func (li LinkedInLinkScores) Names() (string, string) {
 	return "linkedin", "LinkedIn"
 }
 
 // TargetURL is the URL that the scores were computed for
-func (li LinkedInLinkScoreResult) TargetURL() string {
+func (li LinkedInLinkScores) TargetURL() string {
 	return li.URL
 }
 
-// IsValid returns true if the LinkedInLinkScoreResult object is valid (did not return LinkedIn error object)
-func (li LinkedInLinkScoreResult) IsValid() bool {
+// IsValid returns true if the LinkedInLinkScores object is valid (did not return LinkedIn error object)
+func (li LinkedInLinkScores) IsValid() bool {
 	if li.HTTPError == nil {
 		return true
 	}
@@ -42,7 +42,7 @@ func (li LinkedInLinkScoreResult) IsValid() bool {
 }
 
 // SharesCount is the count of how many times the given URL was shared by this scorer, -1 if invalid or not available
-func (li LinkedInLinkScoreResult) SharesCount() int {
+func (li LinkedInLinkScores) SharesCount() int {
 	if li.IsValid() {
 		return li.Count
 	}
@@ -50,14 +50,14 @@ func (li LinkedInLinkScoreResult) SharesCount() int {
 }
 
 // CommentsCount is the count of how many times the given URL was commented on, -1 if invalid or not available
-func (li LinkedInLinkScoreResult) CommentsCount() int {
+func (li LinkedInLinkScores) CommentsCount() int {
 	return -1
 }
 
-// GetLinkedInShareCountForURLText takes a text URL to score and returns the LinkedIn share count
-func GetLinkedInShareCountForURLText(url string, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScoreResult, error) {
+// GetLinkedInLinkScoresForURLText takes a text URL to score and returns the LinkedIn share count
+func GetLinkedInLinkScoresForURLText(url string, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
 	apiEndpoint := "https://www.linkedin.com/countserv/count/share?format=json&url=" + url
-	result := new(LinkedInLinkScoreResult)
+	result := new(LinkedInLinkScores)
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
 	result.GloballyUniqueKey = globallyUniqueKey
@@ -76,10 +76,10 @@ func GetLinkedInShareCountForURLText(url string, globallyUniqueKey string, simul
 	return result, nil
 }
 
-// GetLinkedInShareCountForURL takes a URL to score and returns the LinkedIn share count
-func GetLinkedInShareCountForURL(url *url.URL, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScoreResult, error) {
+// GetLinkedInLinkScoresForURL takes a URL to score and returns the LinkedIn share count
+func GetLinkedInLinkScoresForURL(url *url.URL, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
 	if url == nil {
-		return nil, errors.New("Null URL passed to GetFacebookGraphForURL")
+		return nil, errors.New("Null URL passed to GetLinkedInLinkScoresForURL")
 	}
-	return GetLinkedInShareCountForURLText(url.String(), globallyUniqueKey, simulateLinkedInAPI)
+	return GetLinkedInLinkScoresForURLText(url.String(), globallyUniqueKey, simulateLinkedInAPI)
 }
