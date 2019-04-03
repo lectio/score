@@ -88,3 +88,8 @@ func (a AggregatedLinkScores) SharesCount() int {
 func (a AggregatedLinkScores) CommentsCount() int {
 	return a.AggregateCommentsCount
 }
+
+// FileName returns the name of this scorer's data file in the given path
+func (a AggregatedLinkScores) FileName(path string) string {
+	return a.ScorerIdentity.FileName(path, a)
+}

@@ -66,6 +66,11 @@ func (fb FacebookLinkScores) CommentsCount() int {
 	return -1
 }
 
+// FileName returns the name of this scorer's data file in the given path
+func (fb FacebookLinkScores) FileName(path string) string {
+	return fb.ScorerIdentity.FileName(path, fb)
+}
+
 // FacebookGraphAPIError is the type-safe version of a Facebook API Graph error (e.g. rate limiting)
 type FacebookGraphAPIError struct {
 	Message   string `json:"message"`

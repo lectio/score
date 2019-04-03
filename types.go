@@ -23,6 +23,7 @@ type LinkScores interface {
 	IsValid() bool
 	SharesCount() int
 	CommentsCount() int
+	FileName(path string) string
 }
 
 // HTTPUserAgent may be passed into getHTTPResult as the default HTTP User-Agent header parameter
