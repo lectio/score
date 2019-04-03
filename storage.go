@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 )
 
 // LinkScoresStore defines a storage engine for link scores
@@ -16,13 +15,24 @@ type LinkScoresStore interface {
 
 // LinkScoresJSONFileStore defines a simple JSON file storage engine for LinkScores
 type LinkScoresJSONFileStore struct {
-	validScoresStoragePath   string
-	invalidScoresStoragePath string
+	validScoresFileNameFormat   string
+	invalidScoresFileNameFormat string
+	validScoresStoragePath      string
+	invalidScoresStoragePath    string
 }
 
+// DefaultValidScoresFileNameFormat creates filename of the format {path}/{uniqueId}_{machineName}.json
+const DefaultValidScoresFileNameFormat = "%[2]s%[4]s%[3]s_%[1]s.json"
+
+// DefaultInvalidScoresFileNameFormat creates filename of the format {path}/{uniqueId}.{machineName}-errors.json
+const DefaultInvalidScoresFileNameFormat = "%[2]s%[4]s%[3]s.%[1]s-error.json"
+
 // MakeLinkScoresJSONFileStore creates a new JSON file store in the given paths
-func MakeLinkScoresJSONFileStore(validScoresStoragePath string, invalidScoresStoragePath string, createDestPaths bool) (*LinkScoresJSONFileStore, error) {
+// fileNameFormat uses Sprintf to replace: 1) identity.machineName, 2) path 3) uniqueKey 4) filesep e.g. "%[2]s%[4]s%[3]s_%[1]s.json" (i.e. path/uniqueId_facebook.json)
+func MakeLinkScoresJSONFileStore(validScoresStoragePath string, invalidScoresStoragePath string, createDestPaths bool, validScoresFileNameFormat string, invalidScoresFileNameFormat string) (*LinkScoresJSONFileStore, error) {
 	result := new(LinkScoresJSONFileStore)
+	result.validScoresFileNameFormat = validScoresFileNameFormat
+	result.invalidScoresFileNameFormat = invalidScoresFileNameFormat
 	result.validScoresStoragePath = validScoresStoragePath
 	result.invalidScoresStoragePath = invalidScoresStoragePath
 
@@ -56,12 +66,12 @@ func (f LinkScoresJSONFileStore) Path(scores LinkScores) string {
 // FileName creates the name of this file for file storage
 func (f LinkScoresJSONFileStore) FileName(scores LinkScores) string {
 	path := f.validScoresStoragePath
-	suffix := scores.Identity().MachineName()
+	format := f.validScoresFileNameFormat
 	if !scores.IsValid() {
 		path = f.invalidScoresStoragePath
-		suffix = suffix + "-error"
+		format = f.invalidScoresFileNameFormat
 	}
-	return fmt.Sprintf("%s.%s.json", filepath.Join(path, scores.TargetURLUniqueKey()), suffix)
+	return fmt.Sprintf(format, scores.Identity().MachineName(), path, scores.TargetURLUniqueKey(), os.PathSeparator)
 }
 
 func (f LinkScoresJSONFileStore) Read(targetURLUniqueKey string) (LinkScores, error) {
