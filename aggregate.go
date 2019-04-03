@@ -4,17 +4,19 @@ import "net/url"
 
 // AggregatedLinkScores computes aggregate scores from multiple link scorers
 type AggregatedLinkScores struct {
-	Simulated              bool         `json:"isSimulated,omitempty"`
-	URL                    string       `json:"url"`
-	GloballyUniqueKey      string       `json:"uniqueKey"`
-	AggregateSharesCount   int          `json:"aggregateSharesCount"`
-	AggregateCommentsCount int          `json:"aggregateCommentsCount"`
-	Scores                 []LinkScores `json:"scores"`
+	ScorerIdentity         LinkScorerIdentity `json:"scorer"`
+	Simulated              bool               `json:"isSimulated,omitempty"`
+	URL                    string             `json:"url"`
+	GloballyUniqueKey      string             `json:"uniqueKey"`
+	AggregateSharesCount   int                `json:"aggregateSharesCount"`
+	AggregateCommentsCount int                `json:"aggregateCommentsCount"`
+	Scores                 []LinkScores       `json:"scores"`
 }
 
 // GetAggregatedLinkScores returns a multiple scores structure
 func GetAggregatedLinkScores(url *url.URL, globallyUniqueKey string, initialTotalCount int, simulate bool) *AggregatedLinkScores {
 	result := new(AggregatedLinkScores)
+	result.ScorerIdentity = makeDefaultLinkScorerIdentity("aggregate", "Aggregate")
 	result.Simulated = simulate
 	result.URL = url.String()
 
@@ -52,14 +54,19 @@ func GetAggregatedLinkScores(url *url.URL, globallyUniqueKey string, initialTota
 	return result
 }
 
-// Names returns the identities of the scorer
-func (a AggregatedLinkScores) Names() (string, string) {
-	return "aggregate", "Aggregate"
+// Identity returns the identities of the scorer
+func (a AggregatedLinkScores) Identity() LinkScorerIdentity {
+	return a.ScorerIdentity
 }
 
 // TargetURL is the URL that the scores were computed for
 func (a AggregatedLinkScores) TargetURL() string {
 	return a.URL
+}
+
+// TargetURLUniqueKey identifies the URL in a global namespace
+func (a AggregatedLinkScores) TargetURLUniqueKey() string {
+	return a.GloballyUniqueKey
 }
 
 // IsValid returns true if the FacebookLinkScoreGraphResult object is valid (did not return Facebook error object)

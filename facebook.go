@@ -15,6 +15,7 @@ const UseFacebookAPI = false
 
 // FacebookLinkScores is the type-safe version of what Facebook API Graph returns
 type FacebookLinkScores struct {
+	ScorerIdentity    LinkScorerIdentity     `json:"scorer"`
 	Simulated         bool                   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
 	URL               string                 `json:"url"`                   // part of lectio.score
 	GloballyUniqueKey string                 `json:"uniqueKey"`             // part of lectio.score
@@ -26,14 +27,19 @@ type FacebookLinkScores struct {
 	OpenGraph         *FacebookGraphOGObject `json:"og_object"`             // direct mapping to Facebook API result via Unmarshal httpRes.Body
 }
 
-// Names returns the identities of the scorer
-func (fb FacebookLinkScores) Names() (string, string) {
-	return "facebook", "Facebook"
+// Identity returns the identities of the scorer
+func (fb FacebookLinkScores) Identity() LinkScorerIdentity {
+	return fb.ScorerIdentity
 }
 
 // TargetURL is the URL that the scores were computed for
 func (fb FacebookLinkScores) TargetURL() string {
 	return fb.URL
+}
+
+// TargetURLUniqueKey identifies the URL in a global namespace
+func (fb FacebookLinkScores) TargetURLUniqueKey() string {
+	return fb.GloballyUniqueKey
 }
 
 // IsValid returns true if the FacebookLinkScores object is valid (did not return Facebook error object)
@@ -87,6 +93,7 @@ type FacebookGraphOGObject struct {
 func GetFacebookLinkScoresForURLText(url string, globallyUniqueKey string, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
 	apiEndpoint := "https://graph.facebook.com/?id=" + url
 	result := new(FacebookLinkScores)
+	result.ScorerIdentity = makeDefaultLinkScorerIdentity("facebook", "Facebook")
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
 	result.GloballyUniqueKey = globallyUniqueKey
@@ -107,7 +114,7 @@ func GetFacebookLinkScoresForURLText(url string, globallyUniqueKey string, simul
 	return result, nil
 }
 
-// GetFacebookLinkScorerForURL takes a URL to score and returns the Facebook graph (and share counts)
+// GetFacebookLinkScoresForURL takes a URL to score and returns the Facebook graph (and share counts)
 func GetFacebookLinkScoresForURL(url *url.URL, globallyUniqueKey string, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetFacebookLinkScoresForURL")

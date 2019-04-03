@@ -4,13 +4,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"time"
 )
 
+// LinkScorerIdentity uniquely identifies the link scoring engine (the "scorer")
+type LinkScorerIdentity interface {
+	MachineName() string                            // usually lowercase identifer useful for machine processing
+	HumanName() string                              // can be any meaningful human identifer
+	FileName(path string, scores LinkScores) string // create the name of this file for file storage
+}
+
 // LinkScores instances score a given link (by running an API or other computation)
 type LinkScores interface {
-	Names() (string, string)
+	Identity() LinkScorerIdentity
 	TargetURL() string
+	TargetURLUniqueKey() string
 	IsValid() bool
 	SharesCount() int
 	CommentsCount() int
@@ -52,4 +61,35 @@ func getHTTPResult(apiEndpoint string, userAgent string, timeout time.Duration) 
 
 	result.body = &body
 	return result, nil
+}
+
+type defaultLinkScorerIdentity struct {
+	machineName string
+	humanName   string
+}
+
+func makeDefaultLinkScorerIdentity(machineName string, humanName string) *defaultLinkScorerIdentity {
+	result := new(defaultLinkScorerIdentity)
+	result.machineName = machineName
+	result.humanName = humanName
+	return result
+}
+
+// MachineName is usually lowercase identifer useful for machine processing
+func (i defaultLinkScorerIdentity) MachineName() string {
+	return i.machineName
+}
+
+// HumanName can be any meaningful human identifer
+func (i defaultLinkScorerIdentity) HumanName() string {
+	return i.humanName
+}
+
+// FileName creates the name of this file for file storage
+func (i defaultLinkScorerIdentity) FileName(path string, scores LinkScores) string {
+	suffix := i.MachineName()
+	if !scores.IsValid() {
+		suffix = suffix + "-error"
+	}
+	return fmt.Sprintf("%s.%s.json", filepath.Join(path, scores.TargetURLUniqueKey()), suffix)
 }

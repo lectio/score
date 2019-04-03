@@ -15,22 +15,28 @@ const UseLinkedInAPI = false
 
 // LinkedInLinkScores is the type-safe version of what LinkedIn's share count API returns
 type LinkedInLinkScores struct {
-	Simulated         bool   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
-	URL               string `json:"url"`                   // part of lectio.score
-	GloballyUniqueKey string `json:"uniqueKey"`             // part of lectio.score
-	APIEndpoint       string `json:"apiEndPoint"`           // part of lectio.score
-	HTTPError         error  `json:"httpError,omitempty"`   // part of lectio.score
-	Count             int    `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
+	ScorerIdentity    LinkScorerIdentity `json:"scorer"`
+	Simulated         bool               `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
+	URL               string             `json:"url"`                   // part of lectio.score
+	GloballyUniqueKey string             `json:"uniqueKey"`             // part of lectio.score
+	APIEndpoint       string             `json:"apiEndPoint"`           // part of lectio.score
+	HTTPError         error              `json:"httpError,omitempty"`   // part of lectio.score
+	Count             int                `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
 }
 
-// Names returns the identities of the scorer
-func (li LinkedInLinkScores) Names() (string, string) {
-	return "linkedin", "LinkedIn"
+// Identity returns the identities of the scorer
+func (li LinkedInLinkScores) Identity() LinkScorerIdentity {
+	return li.ScorerIdentity
 }
 
 // TargetURL is the URL that the scores were computed for
 func (li LinkedInLinkScores) TargetURL() string {
 	return li.URL
+}
+
+// TargetURLUniqueKey identifies the URL in a global namespace
+func (li LinkedInLinkScores) TargetURLUniqueKey() string {
+	return li.GloballyUniqueKey
 }
 
 // IsValid returns true if the LinkedInLinkScores object is valid (did not return LinkedIn error object)
@@ -58,6 +64,7 @@ func (li LinkedInLinkScores) CommentsCount() int {
 func GetLinkedInLinkScoresForURLText(url string, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
 	apiEndpoint := "https://www.linkedin.com/countserv/count/share?format=json&url=" + url
 	result := new(LinkedInLinkScores)
+	result.ScorerIdentity = makeDefaultLinkScorerIdentity("linkedin", "LinkedIn")
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
 	result.GloballyUniqueKey = globallyUniqueKey
