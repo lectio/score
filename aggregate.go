@@ -19,6 +19,7 @@ func GetAggregatedLinkScores(url *url.URL, globallyUniqueKey string, initialTota
 	result.ScorerIdentity = makeDefaultLinkScorerIdentity("aggregate", "Aggregate")
 	result.Simulated = simulate
 	result.URL = url.String()
+	result.GloballyUniqueKey = globallyUniqueKey
 
 	if fb, fbErr := GetFacebookLinkScoresForURL(url, globallyUniqueKey, simulate); fbErr == nil {
 		result.Scores = append(result.Scores, fb)
