@@ -1,12 +1,16 @@
 package score
 
-import "net/url"
+import (
+	"net/url"
 
-// GatherURLs is a function that returns a set of URLs that should be added to a collection
-type GatherURLs func() []*url.URL
+	"gopkg.in/cheggaaa/pb.v1"
+)
 
-// ComputeGloballyUniqueKeyForURL is a function that can compute a unique key for a given URL
-type ComputeGloballyUniqueKeyForURL func(url *url.URL) string
+// TargetsIterBoundariesFn is a function that computes the collection iteration start / end indices
+type TargetsIterBoundariesFn func() (startIndex int, endIndex int)
+
+// TargetsIterRetrievalFn is a function that picks up a URL at a particular collection iterator index
+type TargetsIterRetrievalFn func(index int) (ok bool, url *url.URL, globallyUniqueKey string)
 
 // Collection is list of scored links
 type Collection interface {
@@ -20,28 +24,47 @@ type defaultCollection struct {
 	scoredLinksMap   map[string]*AggregatedLinkScores
 	scoredLinks      []*AggregatedLinkScores
 	validScoredLinks []*AggregatedLinkScores
-	uniqueKeyFn      ComputeGloballyUniqueKeyForURL
 }
 
 // MakeMutableCollection creates a new defaultCollection
-func MakeMutableCollection(urlsFn GatherURLs, uniqueKeyFn ComputeGloballyUniqueKeyForURL, verbose bool, simulate bool) Collection {
+func MakeMutableCollection(getBoundaries TargetsIterBoundariesFn, getTarget TargetsIterRetrievalFn, verbose bool, simulate bool) Collection {
 	result := new(defaultCollection)
 	result.simulated = simulate
 	result.scoredLinksMap = make(map[string]*AggregatedLinkScores)
-	result.uniqueKeyFn = uniqueKeyFn
 
-	urls := urlsFn()
-	for _, url := range urls {
-		key := uniqueKeyFn(url)
-		scores := GetAggregatedLinkScores(url, key, -1, simulate)
-		result.scoredLinksMap[key] = scores
-		result.scoredLinks = append(result.scoredLinks, scores)
-		if scores.IsValid() {
-			result.validScoredLinks = append(result.scoredLinks, scores)
+	startIndex, endIndex := getBoundaries()
+	var bar *pb.ProgressBar
+	if verbose {
+		bar = pb.StartNew(endIndex - startIndex + 1)
+		bar.ShowCounters = true
+	}
+	ch := make(chan int)
+	for i := startIndex; i <= endIndex; i++ {
+		ok, url, key := getTarget(i)
+		if ok {
+			// because scores can take time, spin up a bunch concurrently
+			go result.score(i, ch, url, key, simulate)
+		}
+	}
+
+	for i := startIndex; i <= endIndex; i++ {
+		_ = <-ch
+		if verbose {
+			bar.Increment()
 		}
 	}
 
 	return result
+}
+
+func (c *defaultCollection) score(index int, ch chan<- int, url *url.URL, globallyUniqueKey string, simulate bool) {
+	scores := GetAggregatedLinkScores(url, globallyUniqueKey, -1, simulate)
+	c.scoredLinksMap[globallyUniqueKey] = scores
+	c.scoredLinks = append(c.scoredLinks, scores)
+	if scores.IsValid() {
+		c.validScoredLinks = append(c.scoredLinks, scores)
+	}
+	ch <- index
 }
 
 func (c defaultCollection) ScoredLinks() []*AggregatedLinkScores {
