@@ -4,19 +4,21 @@ import "net/url"
 
 // AggregatedLinkScores computes aggregate scores from multiple link scorers
 type AggregatedLinkScores struct {
-	ScorerIdentity         LinkScorerIdentity `json:"scorer"`
-	Simulated              bool               `json:"isSimulated,omitempty"`
-	URL                    string             `json:"url"`
-	GloballyUniqueKey      string             `json:"uniqueKey"`
-	AggregateSharesCount   int                `json:"aggregateSharesCount"`
-	AggregateCommentsCount int                `json:"aggregateCommentsCount"`
-	Scores                 []LinkScores       `json:"scores"`
+	MachineName            string       `json:"scorer"`
+	HumanName              string       `json:"scorerName"`
+	Simulated              bool         `json:"isSimulated,omitempty"`
+	URL                    string       `json:"url"`
+	GloballyUniqueKey      string       `json:"uniqueKey"`
+	AggregateSharesCount   int          `json:"aggregateSharesCount"`
+	AggregateCommentsCount int          `json:"aggregateCommentsCount"`
+	Scores                 []LinkScores `json:"scores"`
 }
 
 // GetAggregatedLinkScores returns a multiple scores structure
 func GetAggregatedLinkScores(url *url.URL, globallyUniqueKey string, initialTotalCount int, simulate bool) *AggregatedLinkScores {
 	result := new(AggregatedLinkScores)
-	result.ScorerIdentity = makeDefaultLinkScorerIdentity("aggregate", "Aggregate")
+	result.MachineName = "aggregate"
+	result.HumanName = "Aggregate"
 	result.Simulated = simulate
 	result.URL = url.String()
 	result.GloballyUniqueKey = globallyUniqueKey
@@ -55,9 +57,19 @@ func GetAggregatedLinkScores(url *url.URL, globallyUniqueKey string, initialTota
 	return result
 }
 
-// Identity returns the identities of the scorer
-func (a AggregatedLinkScores) Identity() LinkScorerIdentity {
-	return a.ScorerIdentity
+// ScorerMachineName returns the name of the scoring engine suitable for machine processing
+func (a AggregatedLinkScores) ScorerMachineName() string {
+	return a.MachineName
+}
+
+// ScorerHumanName returns the name of the scoring engine suitable for humans
+func (a AggregatedLinkScores) ScorerHumanName() string {
+	return a.HumanName
+}
+
+// Scorer returns the scoring engine information
+func (a AggregatedLinkScores) Scorer() LinkScorer {
+	return a
 }
 
 // TargetURL is the URL that the scores were computed for

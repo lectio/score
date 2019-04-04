@@ -7,6 +7,8 @@ import (
 	"net/url"
 )
 
+// TODO: If Facebook rate limiting gets in the way, try https://github.com/ustayready/fireprox
+
 // SimulateFacebookAPI is passed into GetFacebookGraphForURL* if we want to simulate the API
 const SimulateFacebookAPI = true
 
@@ -15,7 +17,8 @@ const UseFacebookAPI = false
 
 // FacebookLinkScores is the type-safe version of what Facebook API Graph returns
 type FacebookLinkScores struct {
-	ScorerIdentity    LinkScorerIdentity     `json:"scorer"`
+	MachineName       string                 `json:"scorer"`
+	HumanName         string                 `json:"scorerName"`
 	Simulated         bool                   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
 	URL               string                 `json:"url"`                   // part of lectio.score
 	GloballyUniqueKey string                 `json:"uniqueKey"`             // part of lectio.score
@@ -27,9 +30,19 @@ type FacebookLinkScores struct {
 	OpenGraph         *FacebookGraphOGObject `json:"og_object"`             // direct mapping to Facebook API result via Unmarshal httpRes.Body
 }
 
-// Identity returns the identities of the scorer
-func (fb FacebookLinkScores) Identity() LinkScorerIdentity {
-	return fb.ScorerIdentity
+// ScorerMachineName returns the name of the scoring engine suitable for machine processing
+func (fb FacebookLinkScores) ScorerMachineName() string {
+	return fb.MachineName
+}
+
+// ScorerHumanName returns the name of the scoring engine suitable for humans
+func (fb FacebookLinkScores) ScorerHumanName() string {
+	return fb.HumanName
+}
+
+// Scorer returns the scoring engine information
+func (fb FacebookLinkScores) Scorer() LinkScorer {
+	return fb
 }
 
 // TargetURL is the URL that the scores were computed for
@@ -93,7 +106,8 @@ type FacebookGraphOGObject struct {
 func GetFacebookLinkScoresForURLText(url string, globallyUniqueKey string, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
 	apiEndpoint := "https://graph.facebook.com/?id=" + url
 	result := new(FacebookLinkScores)
-	result.ScorerIdentity = makeDefaultLinkScorerIdentity("facebook", "Facebook")
+	result.MachineName = "facebook"
+	result.HumanName = "Facebook"
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
 	result.GloballyUniqueKey = globallyUniqueKey

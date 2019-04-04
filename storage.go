@@ -72,7 +72,7 @@ func (f LinkScoresJSONFileStore) FileName(scores LinkScores) string {
 		path = f.invalidScoresStoragePath
 		format = f.invalidScoresFileNameFormat
 	}
-	return filepath.Join(path, fmt.Sprintf(format, scores.Identity().MachineName(), scores.TargetURLUniqueKey()))
+	return filepath.Join(path, fmt.Sprintf(format, scores.Scorer().ScorerMachineName(), scores.TargetURLUniqueKey()))
 }
 
 func (f LinkScoresJSONFileStore) Read(targetURLUniqueKey string) (LinkScores, error) {

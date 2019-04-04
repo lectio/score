@@ -7,15 +7,15 @@ import (
 	"time"
 )
 
-// LinkScorerIdentity uniquely identifies the link scoring engine (the "scorer")
-type LinkScorerIdentity interface {
-	MachineName() string // usually lowercase identifer useful for machine processing
-	HumanName() string   // can be any meaningful human identifer
+// LinkScorer defines the link scoring engine (the "scorer")
+type LinkScorer interface {
+	ScorerMachineName() string // usually lowercase identifer useful for machine processing
+	ScorerHumanName() string   // can be any meaningful human identifer
 }
 
 // LinkScores instances score a given link (by running an API or other computation)
 type LinkScores interface {
-	Identity() LinkScorerIdentity
+	Scorer() LinkScorer
 	TargetURL() string
 	TargetURLUniqueKey() string
 	IsValid() bool
@@ -59,26 +59,4 @@ func getHTTPResult(apiEndpoint string, userAgent string, timeout time.Duration) 
 
 	result.body = &body
 	return result, nil
-}
-
-type defaultLinkScorerIdentity struct {
-	ForMachines string `json:"machineName"`
-	ForHumans   string `json:"humanName"`
-}
-
-func makeDefaultLinkScorerIdentity(machineName string, humanName string) *defaultLinkScorerIdentity {
-	result := new(defaultLinkScorerIdentity)
-	result.ForMachines = machineName
-	result.ForHumans = humanName
-	return result
-}
-
-// MachineName is usually lowercase identifer useful for machine processing
-func (i defaultLinkScorerIdentity) MachineName() string {
-	return i.ForMachines
-}
-
-// HumanName can be any meaningful human identifer
-func (i defaultLinkScorerIdentity) HumanName() string {
-	return i.ForHumans
 }

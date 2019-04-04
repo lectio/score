@@ -15,18 +15,29 @@ const UseLinkedInAPI = false
 
 // LinkedInLinkScores is the type-safe version of what LinkedIn's share count API returns
 type LinkedInLinkScores struct {
-	ScorerIdentity    LinkScorerIdentity `json:"scorer"`
-	Simulated         bool               `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
-	URL               string             `json:"url"`                   // part of lectio.score
-	GloballyUniqueKey string             `json:"uniqueKey"`             // part of lectio.score
-	APIEndpoint       string             `json:"apiEndPoint"`           // part of lectio.score
-	HTTPError         error              `json:"httpError,omitempty"`   // part of lectio.score
-	Count             int                `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
+	MachineName       string `json:"scorer"`
+	HumanName         string `json:"scorerName"`
+	Simulated         bool   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
+	URL               string `json:"url"`                   // part of lectio.score
+	GloballyUniqueKey string `json:"uniqueKey"`             // part of lectio.score
+	APIEndpoint       string `json:"apiEndPoint"`           // part of lectio.score
+	HTTPError         error  `json:"httpError,omitempty"`   // part of lectio.score
+	Count             int    `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
 }
 
-// Identity returns the identities of the scorer
-func (li LinkedInLinkScores) Identity() LinkScorerIdentity {
-	return li.ScorerIdentity
+// ScorerMachineName returns the name of the scoring engine suitable for machine processing
+func (li LinkedInLinkScores) ScorerMachineName() string {
+	return li.MachineName
+}
+
+// ScorerHumanName returns the name of the scoring engine suitable for humans
+func (li LinkedInLinkScores) ScorerHumanName() string {
+	return li.HumanName
+}
+
+// Scorer returns the scoring engine information
+func (li LinkedInLinkScores) Scorer() LinkScorer {
+	return li
 }
 
 // TargetURL is the URL that the scores were computed for
@@ -64,7 +75,8 @@ func (li LinkedInLinkScores) CommentsCount() int {
 func GetLinkedInLinkScoresForURLText(url string, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
 	apiEndpoint := "https://www.linkedin.com/countserv/count/share?format=json&url=" + url
 	result := new(LinkedInLinkScores)
-	result.ScorerIdentity = makeDefaultLinkScorerIdentity("linkedin", "LinkedIn")
+	result.MachineName = "linkedin"
+	result.HumanName = "LinkedIn"
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
 	result.GloballyUniqueKey = globallyUniqueKey
