@@ -6,11 +6,11 @@ import (
 	"gopkg.in/cheggaaa/pb.v1"
 )
 
-// TargetsIterBoundariesFn is a function that computes the collection iteration start / end indices
-type TargetsIterBoundariesFn func() (startIndex int, endIndex int)
+// TargetsIteratorFn is a function that computes the collection iteration start / end indices
+type TargetsIteratorFn func() (startIndex int, endIndex int, retrievalFn TargetsIteratorRetrievalFn)
 
-// TargetsIterRetrievalFn is a function that picks up a URL at a particular collection iterator index
-type TargetsIterRetrievalFn func(index int) (ok bool, url *url.URL, globallyUniqueKey string)
+// TargetsIteratorRetrievalFn is a function that picks up a URL at a particular collection iterator index
+type TargetsIteratorRetrievalFn func(index int) (ok bool, url *url.URL, globallyUniqueKey string)
 
 // Collection is list of scored links
 type Collection interface {
@@ -26,13 +26,13 @@ type defaultCollection struct {
 	validScoredLinks []*AggregatedLinkScores
 }
 
-// MakeMutableCollection creates a new defaultCollection
-func MakeMutableCollection(getBoundaries TargetsIterBoundariesFn, getTarget TargetsIterRetrievalFn, verbose bool, simulate bool) Collection {
+// MakeCollection creates a new defaultCollection
+func MakeCollection(getBoundaries TargetsIteratorFn, verbose bool, simulate bool) Collection {
 	result := new(defaultCollection)
 	result.simulated = simulate
 	result.scoredLinksMap = make(map[string]*AggregatedLinkScores)
 
-	startIndex, endIndex := getBoundaries()
+	startIndex, endIndex, getTarget := getBoundaries()
 	var bar *pb.ProgressBar
 	if verbose {
 		bar = pb.StartNew(endIndex - startIndex + 1)
