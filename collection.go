@@ -38,29 +38,19 @@ func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Col
 	result.scoredLinksMap = make(map[string]*AggregatedLinkScores)
 
 	startIndex, endIndex, getTarget := iterator()
+	ch := make(chan int)
+	for i := startIndex; i <= endIndex; i++ {
+		url, key, err := getTarget(i)
+		go result.score(i, ch, url, key, err, simulate)
+	}
+
 	var bar *pb.ProgressBar
 	if verbose {
 		bar = pb.StartNew(endIndex - startIndex + 1)
 		bar.ShowCounters = true
 	}
-	ch := make(chan int)
-	scoreConcurrentCount := 0
-	for i := startIndex; i <= endIndex; i++ {
-		url, key, err := getTarget(i)
-		if err == nil {
-			if url == nil || len(key) == 0 {
-				result.errors = append(result.errors, fmt.Errorf("skipping scoring of item %d: url %q, key: %q", i, url, key))
-				continue
-			}
-			// because scores can take time, spin up a bunch concurrently
-			go result.score(i, ch, url, key, simulate)
-			scoreConcurrentCount++
-		} else {
-			result.errors = append(result.errors, fmt.Errorf("skipping scoring of item %d: %v", i, err))
-		}
-	}
 
-	for i := 0; i < scoreConcurrentCount; i++ {
+	for i := startIndex; i <= endIndex; i++ {
 		_ = <-ch
 		if verbose {
 			bar.Increment()
@@ -68,23 +58,38 @@ func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Col
 	}
 
 	if verbose {
-		bar.FinishPrint(fmt.Sprintf("Completed scoring %d to %d in iterator: %d in map, %d in list, %d valid", startIndex, endIndex, len(result.scoredLinksMap), len(result.scoredLinks), len(result.validScoredLinks)))
+		bar.FinishPrint(fmt.Sprintf("Completed scoring %d items in iterator: %d in map, %d in list, %d valid", endIndex-startIndex+1, len(result.scoredLinksMap), len(result.scoredLinks), len(result.validScoredLinks)))
 	}
 
 	return result
 }
 
-func (c *defaultCollection) score(index int, ch chan<- int, url *url.URL, globallyUniqueKey string, simulate bool) {
-	scores := GetAggregatedLinkScores(url, globallyUniqueKey, -1, simulate)
+func (c *defaultCollection) score(index int, ch chan<- int, url *url.URL, key string, getTargetErr error, simulate bool) {
 	c.Lock()
-	c.scoredLinksMap[globallyUniqueKey] = scores
-	c.scoredLinks = append(c.scoredLinks, scores)
-	if scores.IsValid() {
-		c.validScoredLinks = append(c.scoredLinks, scores)
+	if getTargetErr == nil {
+		c.errors = append(c.errors, fmt.Errorf("skipping scoring of item %d: %v", index, getTargetErr))
+	} else if url == nil || len(key) == 0 {
+		c.errors = append(c.errors, fmt.Errorf("skipping scoring of item %d: url %q, key: %q", index, url, key))
+	} else {
+		scores := GetAggregatedLinkScores(url, key, -1, simulate)
+		c.scoredLinksMap[key] = scores
+		c.scoredLinks = append(c.scoredLinks, scores)
+		if scores.IsValid() {
+			c.validScoredLinks = append(c.scoredLinks, scores)
+		}
 	}
 	c.Unlock()
 	ch <- index
 }
+
+// if url == nil || len(key) == 0 {
+// 	result.errors = append(result.errors, fmt.Errorf("skipping scoring of item %d: url %q, key: %q", i, url, key))
+// 	continue
+// }
+// // because scores can take time, spin up a bunch concurrently
+// go result.score(i, ch, url, key, err, simulate)
+// scoreConcurrentCount++
+// } else {
 
 func (c defaultCollection) ScoredLinks() []*AggregatedLinkScores {
 	return c.scoredLinks
