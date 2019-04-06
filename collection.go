@@ -45,6 +45,10 @@ func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Col
 	for i := startIndex; i <= endIndex; i++ {
 		url, key, err := getTarget(i)
 		if err == nil {
+			if url == nil || len(key) == 0 {
+				result.errors = append(result.errors, fmt.Errorf("skipping scoring of item %d: url %q, key: %q", i, url, key))
+				continue
+			}
 			// because scores can take time, spin up a bunch concurrently
 			go result.score(i, ch, url, key, simulate)
 		} else {
