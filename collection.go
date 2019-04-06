@@ -66,7 +66,7 @@ func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Col
 
 func (c *defaultCollection) score(index int, ch chan<- int, url *url.URL, key string, getTargetErr error, simulate bool) {
 	c.Lock()
-	if getTargetErr == nil {
+	if getTargetErr != nil {
 		c.errors = append(c.errors, fmt.Errorf("skipping scoring of item %d: %v", index, getTargetErr))
 	} else if url == nil || len(key) == 0 {
 		c.errors = append(c.errors, fmt.Errorf("skipping scoring of item %d: url %q, key: %q", index, url, key))
