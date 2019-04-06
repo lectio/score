@@ -43,7 +43,7 @@ func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Col
 		bar = pb.StartNew(endIndex - startIndex + 1)
 		bar.ShowCounters = true
 	}
-	ch := make(chan int)
+	//ch := make(chan int)
 	for i := startIndex; i <= endIndex; i++ {
 		url, key, err := getTarget(i)
 		if err == nil {
@@ -52,18 +52,19 @@ func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Col
 				continue
 			}
 			// because scores can take time, spin up a bunch concurrently
-			go result.score(i, ch, url, key, simulate)
+			// TODO: figure out why this isn't working: go result.score(i, ch, url, key, simulate)
+			result.score(i /* ch,*/, url, key, simulate)
 		} else {
 			result.errors = append(result.errors, fmt.Errorf("skipping scoring of item %d: %v", i, err))
 		}
 	}
 
-	for i := startIndex; i <= endIndex; i++ {
-		_ = <-ch
-		if verbose {
-			bar.Increment()
-		}
-	}
+	// for i := startIndex; i <= endIndex; i++ {
+	// 	_ = <-ch
+	// 	if verbose {
+	// 		bar.Increment()
+	// 	}
+	// }
 
 	if verbose {
 		bar.FinishPrint(fmt.Sprintf("Completed scoring %d to %d in iterator: %d in map, %d in list, %d valid", startIndex, endIndex, len(result.scoredLinksMap), len(result.scoredLinks), len(result.validScoredLinks)))
@@ -72,16 +73,16 @@ func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Col
 	return result
 }
 
-func (c *defaultCollection) score(index int, ch chan<- int, url *url.URL, globallyUniqueKey string, simulate bool) {
+func (c *defaultCollection) score(index int /* ch chan<- int,*/, url *url.URL, globallyUniqueKey string, simulate bool) {
 	scores := GetAggregatedLinkScores(url, globallyUniqueKey, -1, simulate)
-	c.Lock()
+	// c.Lock()
 	c.scoredLinksMap[globallyUniqueKey] = scores
 	c.scoredLinks = append(c.scoredLinks, scores)
 	if scores.IsValid() {
 		c.validScoredLinks = append(c.scoredLinks, scores)
 	}
-	c.Unlock()
-	ch <- index
+	// c.Unlock()
+	// ch <- index
 }
 
 func (c defaultCollection) ScoredLinks() []*AggregatedLinkScores {
