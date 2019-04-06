@@ -75,7 +75,7 @@ func (c *defaultCollection) score(index int, ch chan<- int, url *url.URL, key st
 		c.scoredLinksMap[key] = scores
 		c.scoredLinks = append(c.scoredLinks, scores)
 		if scores.IsValid() {
-			c.validScoredLinks = append(c.scoredLinks, scores)
+			c.validScoredLinks = append(c.validScoredLinks, scores)
 		}
 	}
 	c.Unlock()
