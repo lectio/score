@@ -60,7 +60,7 @@ func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Col
 	}
 
 	if verbose {
-		bar.FinishPrint(fmt.Sprintf("Completed scoring %d items, %d valid", len(result.scoredLinksMap), len(result.validScoredLinks)))
+		bar.FinishPrint(fmt.Sprintf("Completed scoring %d items: %d in map, %d in list, %d valid", endIndex-startIndex+1, len(result.scoredLinksMap), len(result.scoredLinks), len(result.validScoredLinks)))
 	}
 
 	return result
