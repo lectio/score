@@ -30,12 +30,12 @@ type defaultCollection struct {
 }
 
 // MakeCollection creates a new defaultCollection
-func MakeCollection(getBoundaries TargetsIteratorFn, verbose bool, simulate bool) Collection {
+func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Collection {
 	result := new(defaultCollection)
 	result.simulated = simulate
 	result.scoredLinksMap = make(map[string]*AggregatedLinkScores)
 
-	startIndex, endIndex, getTarget := getBoundaries()
+	startIndex, endIndex, getTarget := iterator()
 	var bar *pb.ProgressBar
 	if verbose {
 		bar = pb.StartNew(endIndex - startIndex + 1)
@@ -57,6 +57,10 @@ func MakeCollection(getBoundaries TargetsIteratorFn, verbose bool, simulate bool
 		if verbose {
 			bar.Increment()
 		}
+	}
+
+	if verbose {
+		bar.FinishPrint(fmt.Sprintf("Completed scoring %d items, %d valid", len(result.scoredLinksMap), len(result.validScoredLinks)))
 	}
 
 	return result
