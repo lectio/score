@@ -32,6 +32,20 @@ func (suite *ScoreSuite) TestScores() {
 	suite.False(aggregated.SharesCount() == -1, "Aggregate count shouldn't be the default")
 }
 
+func (suite *ScoreSuite) TestCollection() {
+	scoreURL, _ := url.Parse("https://www.cnbc.com/2019/03/18/bill-gates-says-he-talked-with-google-employees-about-ai-health-care.html")
+	urls := [...]*url.URL{scoreURL}
+	handler := func(index int) (*url.URL, string, error) {
+		url := urls[index]
+		return urls[index], url.String(), nil
+	}
+	iterator := func() (startIndex int, endIndex int, retrievalFn TargetsIteratorRetrievalFn) {
+		return 0, len(urls) - 1, handler
+	}
+	sc := MakeCollection(iterator, false, true)
+	suite.NotNil(sc, "Scores collection should not be Nil")
+}
+
 func TestSuite(t *testing.T) {
 	suite.Run(t, new(ScoreSuite))
 }
