@@ -2,11 +2,20 @@ package score
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 	"sync"
-
-	"gopkg.in/cheggaaa/pb.v1"
 )
+
+// ProgressReporter is sent to this package's methods if activity progress reporting is expected
+type ProgressReporter interface {
+	IsProgressReportingRequested() bool
+	StartReportableActivity(expectedItems int)
+	StartReportableReaderActivityInBytes(exepectedBytes int64, inputReader io.Reader) io.Reader
+	IncrementReportableActivityProgress()
+	IncrementReportableActivityProgressBy(incrementBy int)
+	CompleteReportableActivityProgress(summary string)
+}
 
 // TargetsIteratorFn is a function that computes the collection iteration start / end indices
 type TargetsIteratorFn func() (startIndex int, endIndex int, retrievalFn TargetsIteratorRetrievalFn)
@@ -32,7 +41,7 @@ type defaultCollection struct {
 }
 
 // MakeCollection creates a new defaultCollection
-func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Collection {
+func MakeCollection(iterator TargetsIteratorFn, pr ProgressReporter, simulate bool) Collection {
 	result := new(defaultCollection)
 	result.simulated = simulate
 	result.scoredLinksMap = make(map[string]*AggregatedLinkScores)
@@ -44,21 +53,19 @@ func MakeCollection(iterator TargetsIteratorFn, verbose bool, simulate bool) Col
 		go result.score(i, ch, url, key, err, simulate)
 	}
 
-	var bar *pb.ProgressBar
-	if verbose {
-		bar = pb.StartNew(endIndex - startIndex + 1)
-		bar.ShowCounters = true
+	if pr != nil && pr.IsProgressReportingRequested() {
+		pr.StartReportableActivity(endIndex - startIndex + 1)
 	}
 
 	for i := startIndex; i <= endIndex; i++ {
 		_ = <-ch
-		if verbose {
-			bar.Increment()
+		if pr != nil && pr.IsProgressReportingRequested() {
+			pr.IncrementReportableActivityProgress()
 		}
 	}
 
-	if verbose {
-		bar.FinishPrint(fmt.Sprintf("Completed scoring %d items in iterator: %d in map, %d in list, %d valid", endIndex-startIndex+1, len(result.scoredLinksMap), len(result.scoredLinks), len(result.validScoredLinks)))
+	if pr != nil && pr.IsProgressReportingRequested() {
+		pr.CompleteReportableActivityProgress(fmt.Sprintf("Completed scoring %d items in iterator: %d in map, %d in list, %d valid", endIndex-startIndex+1, len(result.scoredLinksMap), len(result.scoredLinks), len(result.validScoredLinks)))
 	}
 
 	return result

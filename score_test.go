@@ -42,7 +42,7 @@ func (suite *ScoreSuite) TestCollection() {
 	iterator := func() (startIndex int, endIndex int, retrievalFn TargetsIteratorRetrievalFn) {
 		return 0, len(urls) - 1, handler
 	}
-	sc := MakeCollection(iterator, false, true)
+	sc := MakeCollection(iterator, nil, true)
 	suite.NotNil(sc, "Scores collection should not be Nil")
 }
 
