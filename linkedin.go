@@ -74,7 +74,7 @@ func GetLinkedInLinkScoresForURLText(url string, keys Keys, simulateLinkedInAPI 
 	result.HumanName = "LinkedIn"
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
-	result.GloballyUniqueKey = keys.ScoresKeyForURLText(url)
+	result.GloballyUniqueKey = keys.PrimaryKeyForURLText(url)
 	if simulateLinkedInAPI {
 		result.Simulated = true
 		result.Count = rand.Intn(50)

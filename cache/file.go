@@ -163,7 +163,7 @@ func (c fileCache) path(scores score.LinkScores) string {
 
 // scoresfileName creates the name of this file for file storage
 func (c fileCache) scoresFileName(scores score.LinkScores) string {
-	key := c.keys.ScoresKey(scores)
+	key := c.keys.PrimaryKeyForScores(scores)
 	path := c.validScoresPath
 	format := c.validScoresFileNameFormat
 	if !scores.IsValid() {
@@ -175,7 +175,7 @@ func (c fileCache) scoresFileName(scores score.LinkScores) string {
 
 // urlfileName creates the name of this file for file storage
 func (c fileCache) urlFileName(url *url.URL, valid bool) string {
-	key := c.keys.ScoresKeyForURL(url)
+	key := c.keys.PrimaryKeyForURL(url)
 	path := c.validScoresPath
 	format := c.validScoresFileNameFormat
 	if !valid {

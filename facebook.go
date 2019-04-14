@@ -105,7 +105,7 @@ func GetFacebookLinkScoresForURLText(url string, keys Keys, simulateFacebookAPI 
 	result.HumanName = "Facebook"
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
-	result.GloballyUniqueKey = keys.ScoresKeyForURLText(url)
+	result.GloballyUniqueKey = keys.PrimaryKeyForURLText(url)
 	if simulateFacebookAPI {
 		result.Simulated = simulateFacebookAPI
 		result.Shares = new(FacebookGraphShares)
