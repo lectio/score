@@ -18,7 +18,7 @@ type ProgressReporter interface {
 }
 
 // TargetsIteratorFn is a function that computes the collection iteration start / end indices
-type TargetsIteratorFn func() (startIndex int, endIndex int, retrievalFn TargetsIteratorRetrievalFn)
+type TargetsIteratorFn func() (startIndex int, endIndex int, keys Keys, retrievalFn TargetsIteratorRetrievalFn)
 
 // TargetsIteratorRetrievalFn is a function that picks up a URL at a particular collection iterator index
 type TargetsIteratorRetrievalFn func(index int) (url *url.URL, err error)
@@ -41,12 +41,12 @@ type defaultCollection struct {
 }
 
 // MakeCollection creates a new defaultCollection
-func MakeCollection(iterator TargetsIteratorFn, keys Keys, pr ProgressReporter, simulate bool) Collection {
+func MakeCollection(iterator TargetsIteratorFn, pr ProgressReporter, simulate bool) Collection {
 	result := new(defaultCollection)
 	result.simulated = simulate
 	result.scoredLinksMap = make(map[string]*AggregatedLinkScores)
 
-	startIndex, endIndex, getTarget := iterator()
+	startIndex, endIndex, keys, getTarget := iterator()
 	ch := make(chan int)
 	for i := startIndex; i <= endIndex; i++ {
 		url, err := getTarget(i)

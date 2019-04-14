@@ -40,10 +40,10 @@ func (suite *ScoreSuite) TestCollection() {
 	handler := func(index int) (*url.URL, error) {
 		return urls[index], nil
 	}
-	iterator := func() (startIndex int, endIndex int, retrievalFn TargetsIteratorRetrievalFn) {
-		return 0, len(urls) - 1, handler
+	iterator := func() (startIndex int, endIndex int, keys Keys, retrievalFn TargetsIteratorRetrievalFn) {
+		return 0, len(urls) - 1, suite.keys, handler
 	}
-	sc := MakeCollection(iterator, suite.keys, nil, true)
+	sc := MakeCollection(iterator, nil, true)
 	suite.NotNil(sc, "Scores collection should not be Nil")
 }
 
