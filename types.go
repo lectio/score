@@ -34,7 +34,8 @@ type httpResult struct {
 	body        *[]byte
 }
 
-// GetHTTPResult runs the apiEndpoint and returns the body of the HTTP result
+// getHTTPResult runs the apiEndpoint and returns the body of the HTTP result
+// TODO: Consider using [HTTP Cache](https://github.com/gregjones/httpcache)
 func getHTTPResult(apiEndpoint string, userAgent string, timeout time.Duration) (*httpResult, error) {
 	result := new(httpResult)
 	result.apiEndpoint = apiEndpoint
