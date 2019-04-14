@@ -6,17 +6,10 @@ import (
 	"net/url"
 )
 
-// KeysForURL describes the different ways URL keys can be generated for URLs, this interface is separated because
-// it's useful outside of the package - for use internally in this package, use Keys interface below
-type KeysForURL interface {
+// Keys describes the different ways URL keys can be generated for URLs
+type Keys interface {
 	PrimaryKeyForURL(url *url.URL) string
 	PrimaryKeyForURLText(urlText string) string
-}
-
-// Keys describes the different ways URL keys can be generated
-type Keys interface {
-	KeysForURL
-	PrimaryKeyForScores(scores LinkScores) string
 }
 
 // MakeDefaultKeys creates a default key generator for links
@@ -41,8 +34,4 @@ func (k defaultKeys) PrimaryKeyForURLText(urlText string) string {
 	h.Write([]byte(urlText))
 	bs := h.Sum(nil)
 	return fmt.Sprintf("%x", bs)
-}
-
-func (k defaultKeys) PrimaryKeyForScores(scores LinkScores) string {
-	return k.PrimaryKeyForURLText(scores.TargetURL())
 }
