@@ -103,14 +103,14 @@ type FacebookGraphOGObject struct {
 }
 
 // GetFacebookLinkScoresForURLText takes a text URL to score and returns the Facebook graph (and share counts)
-func GetFacebookLinkScoresForURLText(url string, globallyUniqueKey string, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
+func GetFacebookLinkScoresForURLText(url string, keys Keys, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
 	apiEndpoint := "https://graph.facebook.com/?id=" + url
 	result := new(FacebookLinkScores)
 	result.MachineName = "facebook"
 	result.HumanName = "Facebook"
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
-	result.GloballyUniqueKey = globallyUniqueKey
+	result.GloballyUniqueKey = keys.ScoreKeyForURLText(url)
 	if simulateFacebookAPI {
 		result.Simulated = simulateFacebookAPI
 		result.Shares = new(FacebookGraphShares)
@@ -129,9 +129,9 @@ func GetFacebookLinkScoresForURLText(url string, globallyUniqueKey string, simul
 }
 
 // GetFacebookLinkScoresForURL takes a URL to score and returns the Facebook graph (and share counts)
-func GetFacebookLinkScoresForURL(url *url.URL, globallyUniqueKey string, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
+func GetFacebookLinkScoresForURL(url *url.URL, keys Keys, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetFacebookLinkScoresForURL")
 	}
-	return GetFacebookLinkScoresForURLText(url.String(), globallyUniqueKey, simulateFacebookAPI)
+	return GetFacebookLinkScoresForURLText(url.String(), keys, simulateFacebookAPI)
 }

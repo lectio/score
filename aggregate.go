@@ -15,18 +15,18 @@ type AggregatedLinkScores struct {
 }
 
 // GetAggregatedLinkScores returns a multiple scores structure
-func GetAggregatedLinkScores(url *url.URL, globallyUniqueKey string, initialTotalCount int, simulate bool) *AggregatedLinkScores {
+func GetAggregatedLinkScores(url *url.URL, keys Keys, initialTotalCount int, simulate bool) *AggregatedLinkScores {
 	result := new(AggregatedLinkScores)
 	result.MachineName = "aggregate"
 	result.HumanName = "Aggregate"
 	result.Simulated = simulate
 	result.URL = url.String()
-	result.GloballyUniqueKey = globallyUniqueKey
+	result.GloballyUniqueKey = keys.ScoreKeyForURL(url)
 
-	if fb, fbErr := GetFacebookLinkScoresForURL(url, globallyUniqueKey, simulate); fbErr == nil {
+	if fb, fbErr := GetFacebookLinkScoresForURL(url, keys, simulate); fbErr == nil {
 		result.Scores = append(result.Scores, fb)
 	}
-	if li, liErr := GetLinkedInLinkScoresForURL(url, globallyUniqueKey, simulate); liErr == nil {
+	if li, liErr := GetLinkedInLinkScoresForURL(url, keys, simulate); liErr == nil {
 		result.Scores = append(result.Scores, li)
 	}
 

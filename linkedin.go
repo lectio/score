@@ -72,14 +72,14 @@ func (li LinkedInLinkScores) CommentsCount() int {
 }
 
 // GetLinkedInLinkScoresForURLText takes a text URL to score and returns the LinkedIn share count
-func GetLinkedInLinkScoresForURLText(url string, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
+func GetLinkedInLinkScoresForURLText(url string, keys Keys, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
 	apiEndpoint := "https://www.linkedin.com/countserv/count/share?format=json&url=" + url
 	result := new(LinkedInLinkScores)
 	result.MachineName = "linkedin"
 	result.HumanName = "LinkedIn"
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
-	result.GloballyUniqueKey = globallyUniqueKey
+	result.GloballyUniqueKey = keys.ScoreKeyForURLText(url)
 	if simulateLinkedInAPI {
 		result.Simulated = true
 		result.Count = rand.Intn(50)
@@ -96,9 +96,9 @@ func GetLinkedInLinkScoresForURLText(url string, globallyUniqueKey string, simul
 }
 
 // GetLinkedInLinkScoresForURL takes a URL to score and returns the LinkedIn share count
-func GetLinkedInLinkScoresForURL(url *url.URL, globallyUniqueKey string, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
+func GetLinkedInLinkScoresForURL(url *url.URL, keys Keys, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetLinkedInLinkScoresForURL")
 	}
-	return GetLinkedInLinkScoresForURLText(url.String(), globallyUniqueKey, simulateLinkedInAPI)
+	return GetLinkedInLinkScoresForURLText(url.String(), keys, simulateLinkedInAPI)
 }

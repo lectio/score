@@ -21,7 +21,7 @@ type ProgressReporter interface {
 type TargetsIteratorFn func() (startIndex int, endIndex int, retrievalFn TargetsIteratorRetrievalFn)
 
 // TargetsIteratorRetrievalFn is a function that picks up a URL at a particular collection iterator index
-type TargetsIteratorRetrievalFn func(index int) (url *url.URL, globallyUniqueKey string, err error)
+type TargetsIteratorRetrievalFn func(index int) (url *url.URL, err error)
 
 // Collection is list of scored links
 type Collection interface {
@@ -41,7 +41,7 @@ type defaultCollection struct {
 }
 
 // MakeCollection creates a new defaultCollection
-func MakeCollection(iterator TargetsIteratorFn, pr ProgressReporter, simulate bool) Collection {
+func MakeCollection(iterator TargetsIteratorFn, keys Keys, pr ProgressReporter, simulate bool) Collection {
 	result := new(defaultCollection)
 	result.simulated = simulate
 	result.scoredLinksMap = make(map[string]*AggregatedLinkScores)
@@ -49,8 +49,8 @@ func MakeCollection(iterator TargetsIteratorFn, pr ProgressReporter, simulate bo
 	startIndex, endIndex, getTarget := iterator()
 	ch := make(chan int)
 	for i := startIndex; i <= endIndex; i++ {
-		url, key, err := getTarget(i)
-		go result.score(i, ch, url, key, err, simulate)
+		url, err := getTarget(i)
+		go result.score(i, ch, url, keys, err, simulate)
 	}
 
 	if pr != nil && pr.IsProgressReportingRequested() {
@@ -71,14 +71,15 @@ func MakeCollection(iterator TargetsIteratorFn, pr ProgressReporter, simulate bo
 	return result
 }
 
-func (c *defaultCollection) score(index int, ch chan<- int, url *url.URL, key string, getTargetErr error, simulate bool) {
+func (c *defaultCollection) score(index int, ch chan<- int, url *url.URL, keys Keys, getTargetErr error, simulate bool) {
 	c.Lock()
+	key := keys.ScoreKeyForURL(url)
 	if getTargetErr != nil {
 		c.errors = append(c.errors, fmt.Errorf("skipping scoring of item %d: %v", index, getTargetErr))
 	} else if url == nil || len(key) == 0 {
 		c.errors = append(c.errors, fmt.Errorf("skipping scoring of item %d: url %q, key: %q", index, url, key))
 	} else {
-		scores := GetAggregatedLinkScores(url, key, -1, simulate)
+		scores := GetAggregatedLinkScores(url, keys, -1, simulate)
 		c.scoredLinksMap[key] = scores
 		c.scoredLinks = append(c.scoredLinks, scores)
 		if scores.IsValid() {
