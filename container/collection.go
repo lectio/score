@@ -77,7 +77,7 @@ func MakeCollection(cache cache.Cache, iterator TargetsIteratorFn, pr ProgressRe
 
 func (c *defaultCollection) score(index int, ch chan<- int, url *url.URL, keys score.Keys, getTargetErr error) {
 	c.mutex.Lock()
-	key := keys.ScoreKeyForURL(url)
+	key := keys.ScoresKeyForURL(url)
 	if getTargetErr != nil {
 		c.errors = append(c.errors, fmt.Errorf("skipping scoring of item %d: %v", index, getTargetErr))
 	} else if url == nil || len(key) == 0 {

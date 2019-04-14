@@ -4,7 +4,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/lectio/score/container"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -33,19 +32,6 @@ func (suite *ScoreSuite) TestScores() {
 
 	aggregated := GetAggregatedLinkScores(scoreURL, suite.keys, -1, false)
 	suite.False(aggregated.SharesCount() == -1, "Aggregate count shouldn't be the default")
-}
-
-func (suite *ScoreSuite) TestCollection() {
-	scoreURL, _ := url.Parse("https://www.cnbc.com/2019/03/18/bill-gates-says-he-talked-with-google-employees-about-ai-health-care.html")
-	urls := [...]*url.URL{scoreURL}
-	handler := func(index int) (*url.URL, error) {
-		return urls[index], nil
-	}
-	iterator := func() (startIndex int, endIndex int, keys Keys, retrievalFn container.TargetsIteratorRetrievalFn) {
-		return 0, len(urls) - 1, suite.keys, handler
-	}
-	sc := container.MakeCollection(iterator, nil, true)
-	suite.NotNil(sc, "Scores collection should not be Nil")
 }
 
 func TestSuite(t *testing.T) {

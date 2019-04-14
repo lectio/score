@@ -45,11 +45,6 @@ func (li LinkedInLinkScores) TargetURL() string {
 	return li.URL
 }
 
-// TargetURLUniqueKey identifies the URL in a global namespace
-func (li LinkedInLinkScores) TargetURLUniqueKey() string {
-	return li.GloballyUniqueKey
-}
-
 // IsValid returns true if the LinkedInLinkScores object is valid (did not return LinkedIn error object)
 func (li LinkedInLinkScores) IsValid() bool {
 	if li.HTTPError == nil {
@@ -79,7 +74,7 @@ func GetLinkedInLinkScoresForURLText(url string, keys Keys, simulateLinkedInAPI 
 	result.HumanName = "LinkedIn"
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
-	result.GloballyUniqueKey = keys.ScoreKeyForURLText(url)
+	result.GloballyUniqueKey = keys.ScoresKeyForURLText(url)
 	if simulateLinkedInAPI {
 		result.Simulated = true
 		result.Count = rand.Intn(50)

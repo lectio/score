@@ -17,7 +17,6 @@ type LinkScorer interface {
 type LinkScores interface {
 	Scorer() LinkScorer
 	TargetURL() string
-	TargetURLUniqueKey() string
 	IsValid() bool
 	SharesCount() int
 	CommentsCount() int

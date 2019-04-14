@@ -50,11 +50,6 @@ func (fb FacebookLinkScores) TargetURL() string {
 	return fb.URL
 }
 
-// TargetURLUniqueKey identifies the URL in a global namespace
-func (fb FacebookLinkScores) TargetURLUniqueKey() string {
-	return fb.GloballyUniqueKey
-}
-
 // IsValid returns true if the FacebookLinkScores object is valid (did not return Facebook error object)
 func (fb FacebookLinkScores) IsValid() bool {
 	if fb.HTTPError == nil && fb.APIError == nil {
@@ -110,7 +105,7 @@ func GetFacebookLinkScoresForURLText(url string, keys Keys, simulateFacebookAPI 
 	result.HumanName = "Facebook"
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
-	result.GloballyUniqueKey = keys.ScoreKeyForURLText(url)
+	result.GloballyUniqueKey = keys.ScoresKeyForURLText(url)
 	if simulateFacebookAPI {
 		result.Simulated = simulateFacebookAPI
 		result.Shares = new(FacebookGraphShares)

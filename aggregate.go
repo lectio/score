@@ -21,7 +21,7 @@ func GetAggregatedLinkScores(url *url.URL, keys Keys, initialTotalCount int, sim
 	result.HumanName = "Aggregate"
 	result.Simulated = simulate
 	result.URL = url.String()
-	result.GloballyUniqueKey = keys.ScoreKeyForURL(url)
+	result.GloballyUniqueKey = keys.ScoresKeyForURL(url)
 
 	if fb, fbErr := GetFacebookLinkScoresForURL(url, keys, simulate); fbErr == nil {
 		result.Scores = append(result.Scores, fb)
@@ -75,11 +75,6 @@ func (a AggregatedLinkScores) Scorer() LinkScorer {
 // TargetURL is the URL that the scores were computed for
 func (a AggregatedLinkScores) TargetURL() string {
 	return a.URL
-}
-
-// TargetURLUniqueKey identifies the URL in a global namespace
-func (a AggregatedLinkScores) TargetURLUniqueKey() string {
-	return a.GloballyUniqueKey
 }
 
 // IsValid returns true if the FacebookLinkScoreGraphResult object is valid (did not return Facebook error object)
