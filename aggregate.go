@@ -1,6 +1,8 @@
 package score
 
-import "net/url"
+import (
+	"net/url"
+)
 
 // AggregatedLinkScores computes aggregate scores from multiple link scorers
 type AggregatedLinkScores struct {
@@ -57,19 +59,9 @@ func GetAggregatedLinkScores(url *url.URL, keys Keys, initialTotalCount int, sim
 	return result
 }
 
-// ScorerMachineName returns the name of the scoring engine suitable for machine processing
-func (a AggregatedLinkScores) ScorerMachineName() string {
+// SourceID returns the name of the scoring engine
+func (a AggregatedLinkScores) SourceID() string {
 	return a.MachineName
-}
-
-// ScorerHumanName returns the name of the scoring engine suitable for humans
-func (a AggregatedLinkScores) ScorerHumanName() string {
-	return a.HumanName
-}
-
-// Scorer returns the scoring engine information
-func (a AggregatedLinkScores) Scorer() LinkScorer {
-	return a
 }
 
 // TargetURL is the URL that the scores were computed for

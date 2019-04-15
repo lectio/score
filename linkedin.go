@@ -25,19 +25,9 @@ type LinkedInLinkScores struct {
 	Count             int    `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
 }
 
-// ScorerMachineName returns the name of the scoring engine suitable for machine processing
-func (li LinkedInLinkScores) ScorerMachineName() string {
+// SourceID returns the name of the scoring engine
+func (li LinkedInLinkScores) SourceID() string {
 	return li.MachineName
-}
-
-// ScorerHumanName returns the name of the scoring engine suitable for humans
-func (li LinkedInLinkScores) ScorerHumanName() string {
-	return li.HumanName
-}
-
-// Scorer returns the scoring engine information
-func (li LinkedInLinkScores) Scorer() LinkScorer {
-	return li
 }
 
 // TargetURL is the URL that the scores were computed for

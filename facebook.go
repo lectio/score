@@ -30,19 +30,9 @@ type FacebookLinkScores struct {
 	OpenGraph         *FacebookGraphOGObject `json:"og_object"`             // direct mapping to Facebook API result via Unmarshal httpRes.Body
 }
 
-// ScorerMachineName returns the name of the scoring engine suitable for machine processing
-func (fb FacebookLinkScores) ScorerMachineName() string {
+// SourceID returns the name of the scoring engine
+func (fb FacebookLinkScores) SourceID() string {
 	return fb.MachineName
-}
-
-// ScorerHumanName returns the name of the scoring engine suitable for humans
-func (fb FacebookLinkScores) ScorerHumanName() string {
-	return fb.HumanName
-}
-
-// Scorer returns the scoring engine information
-func (fb FacebookLinkScores) Scorer() LinkScorer {
-	return fb
 }
 
 // TargetURL is the URL that the scores were computed for

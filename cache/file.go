@@ -170,7 +170,7 @@ func (c fileCache) scoresFileName(scores score.LinkScores) string {
 		path = c.invalidScoresPath
 		format = c.invalidScoresFileNameFormat
 	}
-	return filepath.Join(path, fmt.Sprintf(format, scores.Scorer().ScorerMachineName(), key))
+	return filepath.Join(path, fmt.Sprintf(format, scores.SourceID(), key))
 }
 
 // urlfileName creates the name of this file for file storage
