@@ -25,7 +25,7 @@ func (k defaultKeys) PrimaryKeyForURL(url *url.URL) string {
 	if url != nil {
 		return k.PrimaryKeyForURLText(url.String())
 	}
-	return "url_is_nil_in_ScoreKeyForURL"
+	return "url_is_nil_in_PrimaryKeyForURL"
 }
 
 func (k defaultKeys) PrimaryKeyForURLText(urlText string) string {
