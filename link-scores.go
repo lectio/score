@@ -1,6 +1,7 @@
 package score
 
 import (
+	"io"
 	"net/url"
 )
 
@@ -20,18 +21,19 @@ type Lifecycle interface {
 
 // Reader defines common reader methods
 type Reader interface {
-	ReadLinkScores(*url.URL) (LinkScores, error)
-	FindLinkScores(*url.URL) (LinkScores, bool, error)
+	GetLinkScores(*url.URL) (LinkScores, error)
+	HasLinkScores(*url.URL) (bool, error)
 }
 
 // Writer defines common writer methods
 type Writer interface {
 	WriteLinkScores(LinkScores) error
+	DeleteLinkScores(LinkScores) error
 }
 
 // Store pulls together all the lifecyle, reader, and writer methods
 type Store interface {
-	Lifecycle
 	Reader
 	Writer
+	io.Closer
 }
