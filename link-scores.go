@@ -9,6 +9,7 @@ import (
 type LinkScores interface {
 	SourceID() string
 	TargetURL() string
+	Issues() Issues
 	IsValid() bool
 	SharesCount() int
 	CommentsCount() int
@@ -16,19 +17,19 @@ type LinkScores interface {
 
 // Lifecycle defines common creation / destruction methods
 type Lifecycle interface {
-	ScoreLink(*url.URL) (LinkScores, error)
+	ScoreLink(*url.URL) (LinkScores, Issue)
 }
 
 // Reader defines common reader methods
 type Reader interface {
-	GetLinkScores(*url.URL) (LinkScores, error)
-	HasLinkScores(*url.URL) (bool, error)
+	GetLinkScores(*url.URL) (LinkScores, Issue)
+	HasLinkScores(*url.URL) (bool, Issue)
 }
 
 // Writer defines common writer methods
 type Writer interface {
-	WriteLinkScores(LinkScores) error
-	DeleteLinkScores(LinkScores) error
+	WriteLinkScores(LinkScores) Issue
+	DeleteLinkScores(LinkScores) Issue
 }
 
 // Store pulls together all the lifecyle, reader, and writer methods

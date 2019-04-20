@@ -23,7 +23,7 @@ type FacebookLinkScores struct {
 	URL               string                 `json:"url"`                   // part of lectio.score
 	GloballyUniqueKey string                 `json:"uniqueKey"`             // part of lectio.score
 	APIEndpoint       string                 `json:"apiEndPoint"`           // part of lectio.score
-	HTTPError         error                  `json:"httpError,omitempty"`   // part of lectio.score
+	IssuesFound       []Issue                `json:"issues"`                // part of lectio.score
 	APIError          *FacebookGraphAPIError `json:"error,omitempty"`       // direct mapping to Facebook API result via Unmarshal httpRes.Body
 	ID                string                 `json:"id"`                    // direct mapping to Facebook API result via Unmarshal httpRes.Body
 	Shares            *FacebookGraphShares   `json:"share"`                 // direct mapping to Facebook API result via Unmarshal httpRes.Body
@@ -42,7 +42,7 @@ func (fb FacebookLinkScores) TargetURL() string {
 
 // IsValid returns true if the FacebookLinkScores object is valid (did not return Facebook error object)
 func (fb FacebookLinkScores) IsValid() bool {
-	if fb.HTTPError == nil && fb.APIError == nil {
+	if fb.IssuesFound == nil || len(fb.IssuesFound) == 0 {
 		return true
 	}
 	return false
@@ -62,6 +62,47 @@ func (fb FacebookLinkScores) CommentsCount() int {
 		return fb.Shares.CommentCount
 	}
 	return -1
+}
+
+// Issues contains all the problems detected in scoring
+func (fb FacebookLinkScores) Issues() Issues {
+	return fb
+}
+
+// ErrorsAndWarnings contains the problems in this link plus satisfies the Link.Issues interface
+func (fb FacebookLinkScores) ErrorsAndWarnings() []Issue {
+	return fb.IssuesFound
+}
+
+// IssueCounts returns the total, errors, and warnings counts
+func (fb FacebookLinkScores) IssueCounts() (uint, uint, uint) {
+	if fb.IssuesFound == nil {
+		return 0, 0, 0
+	}
+	var errors, warnings uint
+	for _, i := range fb.IssuesFound {
+		if i.IsError() {
+			errors++
+		} else {
+			warnings++
+		}
+	}
+	return uint(len(fb.IssuesFound)), errors, warnings
+}
+
+// HandleIssues loops through each issue and calls a particular handler
+func (fb FacebookLinkScores) HandleIssues(errorHandler func(Issue), warningHandler func(Issue)) {
+	if fb.IssuesFound == nil {
+		return
+	}
+	for _, i := range fb.IssuesFound {
+		if i.IsError() && errorHandler != nil {
+			errorHandler(i)
+		}
+		if i.IsWarning() && warningHandler != nil {
+			warningHandler(i)
+		}
+	}
 }
 
 // FacebookGraphAPIError is the type-safe version of a Facebook API Graph error (e.g. rate limiting)
@@ -88,7 +129,7 @@ type FacebookGraphOGObject struct {
 }
 
 // GetFacebookLinkScoresForURLText takes a text URL to score and returns the Facebook graph (and share counts)
-func GetFacebookLinkScoresForURLText(url string, keys Keys, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
+func GetFacebookLinkScoresForURLText(url string, keys Keys, simulateFacebookAPI bool) *FacebookLinkScores {
 	apiEndpoint := "https://graph.facebook.com/?id=" + url
 	result := new(FacebookLinkScores)
 	result.MachineName = "facebook"
@@ -101,16 +142,16 @@ func GetFacebookLinkScoresForURLText(url string, keys Keys, simulateFacebookAPI 
 		result.Shares = new(FacebookGraphShares)
 		result.Shares.ShareCount = rand.Intn(750)
 		result.Shares.CommentCount = rand.Intn(2500)
-		return result, nil
+		return result
 	}
-	httpRes, httpErr := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)
+	httpRes, issue := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)
 	result.APIEndpoint = httpRes.apiEndpoint
-	result.HTTPError = httpErr
-	if httpErr != nil {
-		return result, httpErr
+	if issue != nil {
+		result.IssuesFound = append(result.IssuesFound, issue)
+		return result
 	}
 	json.Unmarshal(*httpRes.body, result)
-	return result, nil
+	return result
 }
 
 // GetFacebookLinkScoresForURL takes a URL to score and returns the Facebook graph (and share counts)
@@ -118,5 +159,5 @@ func GetFacebookLinkScoresForURL(url *url.URL, keys Keys, simulateFacebookAPI bo
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetFacebookLinkScoresForURL")
 	}
-	return GetFacebookLinkScoresForURLText(url.String(), keys, simulateFacebookAPI)
+	return GetFacebookLinkScoresForURLText(url.String(), keys, simulateFacebookAPI), nil
 }

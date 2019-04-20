@@ -14,6 +14,8 @@ type AggregatedLinkScores struct {
 	AggregateSharesCount   int          `json:"aggregateSharesCount"`
 	AggregateCommentsCount int          `json:"aggregateCommentsCount"`
 	Scores                 []LinkScores `json:"scores"`
+
+	issues []Issue
 }
 
 // GetAggregatedLinkScores returns a multiple scores structure
@@ -27,9 +29,19 @@ func GetAggregatedLinkScores(url *url.URL, keys Keys, initialTotalCount int, sim
 
 	if fb, fbErr := GetFacebookLinkScoresForURL(url, keys, simulate); fbErr == nil {
 		result.Scores = append(result.Scores, fb)
+		if fb.Issues() != nil {
+			for _, issue := range fb.Issues().ErrorsAndWarnings() {
+				result.issues = append(result.issues, issue)
+			}
+		}
 	}
 	if li, liErr := GetLinkedInLinkScoresForURL(url, keys, simulate); liErr == nil {
 		result.Scores = append(result.Scores, li)
+		if li.Issues() != nil {
+			for _, issue := range li.Issues().ErrorsAndWarnings() {
+				result.issues = append(result.issues, issue)
+			}
+		}
 	}
 
 	result.AggregateSharesCount = initialTotalCount   // this is often set to -1 to signify "uncalculated" or similar
@@ -87,4 +99,45 @@ func (a AggregatedLinkScores) SharesCount() int {
 // CommentsCount is the count of how many times the given URL was commented on, -1 if invalid or not available
 func (a AggregatedLinkScores) CommentsCount() int {
 	return a.AggregateCommentsCount
+}
+
+// Issues contains all the problems detected in scoring
+func (a AggregatedLinkScores) Issues() Issues {
+	return a
+}
+
+// ErrorsAndWarnings contains the problems in this link plus satisfies the Link.Issues interface
+func (a AggregatedLinkScores) ErrorsAndWarnings() []Issue {
+	return a.issues
+}
+
+// IssueCounts returns the total, errors, and warnings counts
+func (a AggregatedLinkScores) IssueCounts() (uint, uint, uint) {
+	if a.issues == nil {
+		return 0, 0, 0
+	}
+	var errors, warnings uint
+	for _, i := range a.issues {
+		if i.IsError() {
+			errors++
+		} else {
+			warnings++
+		}
+	}
+	return uint(len(a.issues)), errors, warnings
+}
+
+// HandleIssues loops through each issue and calls a particular handler
+func (a AggregatedLinkScores) HandleIssues(errorHandler func(Issue), warningHandler func(Issue)) {
+	if a.issues == nil {
+		return
+	}
+	for _, i := range a.issues {
+		if i.IsError() && errorHandler != nil {
+			errorHandler(i)
+		}
+		if i.IsWarning() && warningHandler != nil {
+			warningHandler(i)
+		}
+	}
 }

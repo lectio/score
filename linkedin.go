@@ -15,14 +15,14 @@ const UseLinkedInAPI = false
 
 // LinkedInLinkScores is the type-safe version of what LinkedIn's share count API returns
 type LinkedInLinkScores struct {
-	MachineName       string `json:"scorer"`
-	HumanName         string `json:"scorerName"`
-	Simulated         bool   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
-	URL               string `json:"url"`                   // part of lectio.score
-	GloballyUniqueKey string `json:"uniqueKey"`             // part of lectio.score
-	APIEndpoint       string `json:"apiEndPoint"`           // part of lectio.score
-	HTTPError         error  `json:"httpError,omitempty"`   // part of lectio.score
-	Count             int    `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
+	MachineName       string  `json:"scorer"`
+	HumanName         string  `json:"scorerName"`
+	Simulated         bool    `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
+	URL               string  `json:"url"`                   // part of lectio.score
+	GloballyUniqueKey string  `json:"uniqueKey"`             // part of lectio.score
+	APIEndpoint       string  `json:"apiEndPoint"`           // part of lectio.score
+	IssuesFound       []Issue `json:"issues"`                // part of lectio.score
+	Count             int     `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
 }
 
 // SourceID returns the name of the scoring engine
@@ -37,7 +37,7 @@ func (li LinkedInLinkScores) TargetURL() string {
 
 // IsValid returns true if the LinkedInLinkScores object is valid (did not return LinkedIn error object)
 func (li LinkedInLinkScores) IsValid() bool {
-	if li.HTTPError == nil {
+	if li.IssuesFound == nil || len(li.IssuesFound) == 0 {
 		return true
 	}
 	return false
@@ -56,8 +56,49 @@ func (li LinkedInLinkScores) CommentsCount() int {
 	return -1
 }
 
+// Issues contains all the problems detected in scoring
+func (li LinkedInLinkScores) Issues() Issues {
+	return li
+}
+
+// ErrorsAndWarnings contains the problems in this link plus satisfies the Link.Issues interface
+func (li LinkedInLinkScores) ErrorsAndWarnings() []Issue {
+	return li.IssuesFound
+}
+
+// IssueCounts returns the total, errors, and warnings counts
+func (li LinkedInLinkScores) IssueCounts() (uint, uint, uint) {
+	if li.IssuesFound == nil {
+		return 0, 0, 0
+	}
+	var errors, warnings uint
+	for _, i := range li.IssuesFound {
+		if i.IsError() {
+			errors++
+		} else {
+			warnings++
+		}
+	}
+	return uint(len(li.IssuesFound)), errors, warnings
+}
+
+// HandleIssues loops through each issue and calls a particular handler
+func (li LinkedInLinkScores) HandleIssues(errorHandler func(Issue), warningHandler func(Issue)) {
+	if li.IssuesFound == nil {
+		return
+	}
+	for _, i := range li.IssuesFound {
+		if i.IsError() && errorHandler != nil {
+			errorHandler(i)
+		}
+		if i.IsWarning() && warningHandler != nil {
+			warningHandler(i)
+		}
+	}
+}
+
 // GetLinkedInLinkScoresForURLText takes a text URL to score and returns the LinkedIn share count
-func GetLinkedInLinkScoresForURLText(url string, keys Keys, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
+func GetLinkedInLinkScoresForURLText(url string, keys Keys, simulateLinkedInAPI bool) *LinkedInLinkScores {
 	apiEndpoint := "https://www.linkedin.com/countserv/count/share?format=json&url=" + url
 	result := new(LinkedInLinkScores)
 	result.MachineName = "linkedin"
@@ -68,16 +109,16 @@ func GetLinkedInLinkScoresForURLText(url string, keys Keys, simulateLinkedInAPI 
 	if simulateLinkedInAPI {
 		result.Simulated = true
 		result.Count = rand.Intn(50)
-		return result, nil
+		return result
 	}
-	httpRes, httpErr := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)
+	httpRes, issue := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)
 	result.APIEndpoint = httpRes.apiEndpoint
-	result.HTTPError = httpErr
-	if httpErr != nil {
-		return result, httpErr
+	if issue != nil {
+		result.IssuesFound = append(result.IssuesFound, issue)
+		return result
 	}
 	json.Unmarshal(*httpRes.body, result)
-	return result, nil
+	return result
 }
 
 // GetLinkedInLinkScoresForURL takes a URL to score and returns the LinkedIn share count
@@ -85,5 +126,5 @@ func GetLinkedInLinkScoresForURL(url *url.URL, keys Keys, simulateLinkedInAPI bo
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetLinkedInLinkScoresForURL")
 	}
-	return GetLinkedInLinkScoresForURLText(url.String(), keys, simulateLinkedInAPI)
+	return GetLinkedInLinkScoresForURLText(url.String(), keys, simulateLinkedInAPI), nil
 }

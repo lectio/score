@@ -21,7 +21,7 @@ type httpResult struct {
 
 // GetHTTPResult runs the apiEndpoint and returns the body of the HTTP result
 // TODO: Consider using [HTTP Cache](https://github.com/gregjones/httpcache)
-func getHTTPResult(apiEndpoint string, userAgent string, timeout time.Duration) (*httpResult, error) {
+func getHTTPResult(apiEndpoint string, userAgent string, timeout time.Duration) (*httpResult, Issue) {
 	result := new(httpResult)
 	result.apiEndpoint = apiEndpoint
 
@@ -30,17 +30,22 @@ func getHTTPResult(apiEndpoint string, userAgent string, timeout time.Duration) 
 	}
 	req, reqErr := http.NewRequest(http.MethodGet, apiEndpoint, nil)
 	if reqErr != nil {
-		return nil, fmt.Errorf("Unable to create request %q: %v", apiEndpoint, reqErr)
+		return nil, newIssue(apiEndpoint, UnableToCreateHTTPRequest, fmt.Sprintf("Unable to create HTTP request: %v", reqErr), true)
 	}
 	req.Header.Set("User-Agent", userAgent)
-	res, getErr := httpClient.Do(req)
+	resp, getErr := httpClient.Do(req)
 	if getErr != nil {
-		return nil, fmt.Errorf("Unable to execute GET request %q: %v", apiEndpoint, getErr)
+		return nil, newIssue(apiEndpoint, UnableToExecuteHTTPGETRequest, fmt.Sprintf("Unable to execute HTTP GET request: %v", getErr), true)
 	}
-	defer res.Body.Close()
-	body, readErr := ioutil.ReadAll(res.Body)
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, newHTTPResponseIssue(apiEndpoint, resp.StatusCode, fmt.Sprintf("HTTP response status is not 200: %v", resp.StatusCode), true)
+	}
+
+	body, readErr := ioutil.ReadAll(resp.Body)
 	if readErr != nil {
-		return nil, fmt.Errorf("Unable to read body from request %q: %v", apiEndpoint, readErr)
+		return nil, newIssue(apiEndpoint, UnableToReadBodyFromHTTPResponse, fmt.Sprintf("Unable to read body from HTTP response: %v", readErr), true)
 	}
 
 	result.body = &body
