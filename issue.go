@@ -2,19 +2,17 @@ package score
 
 import "fmt"
 
-type IssueCode string
-
 const (
-	UnableToCreateHTTPRequest        IssueCode = "SCORE_E-0100"
-	UnableToExecuteHTTPGETRequest    IssueCode = "SCORE_E-0200"
-	InvalidAPIRespHTTPStatusCode     IssueCode = "SCORE_E-0300"
-	UnableToReadBodyFromHTTPResponse IssueCode = "SCORE_E-0400"
+	UnableToCreateHTTPRequest        string = "SCORE_E-0100"
+	UnableToExecuteHTTPGETRequest    string = "SCORE_E-0200"
+	InvalidAPIRespHTTPStatusCode     string = "SCORE_E-0300"
+	UnableToReadBodyFromHTTPResponse string = "SCORE_E-0400"
 )
 
 // Issue is a structured problem identification with context information
 type Issue interface {
 	IssueContext() interface{} // this will be the scores object plus location (item index, etc.), it's kept generic so it doesn't require package dependency
-	IssueCode() IssueCode      // useful to uniquely identify a particular code
+	IssueCode() string         // useful to uniquely identify a particular code
 	Issue() string             // the
 
 	IsError() bool   // this issue is an error
@@ -29,13 +27,13 @@ type Issues interface {
 }
 
 type issue struct {
-	APIEndpoint    string    `json:"context"`
-	Code           IssueCode `json:"code"`
-	Message        string    `json:"message"`
-	IsIssueAnError bool      `json:"isError"`
+	APIEndpoint    string `json:"context"`
+	Code           string `json:"code"`
+	Message        string `json:"message"`
+	IsIssueAnError bool   `json:"isError"`
 }
 
-func newIssue(apiEndpoint string, code IssueCode, message string, isError bool) Issue {
+func newIssue(apiEndpoint string, code string, message string, isError bool) Issue {
 	result := new(issue)
 	result.APIEndpoint = apiEndpoint
 	result.Code = code
@@ -47,7 +45,7 @@ func newIssue(apiEndpoint string, code IssueCode, message string, isError bool) 
 func newHTTPResponseIssue(apiEndpoint string, httpRespStatusCode int, message string, isError bool) Issue {
 	result := new(issue)
 	result.APIEndpoint = apiEndpoint
-	result.Code = IssueCode(fmt.Sprintf("%s-HTTP-%d", InvalidAPIRespHTTPStatusCode, httpRespStatusCode))
+	result.Code = fmt.Sprintf("%s-HTTP-%d", InvalidAPIRespHTTPStatusCode, httpRespStatusCode)
 	result.Message = message
 	result.IsIssueAnError = isError
 	return result
@@ -57,7 +55,7 @@ func (i issue) IssueContext() interface{} {
 	return i.APIEndpoint
 }
 
-func (i issue) IssueCode() IssueCode {
+func (i issue) IssueCode() string {
 	return i.Code
 }
 
