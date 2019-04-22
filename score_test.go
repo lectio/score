@@ -19,6 +19,10 @@ func (suite *ScoreSuite) SetupSuite() {
 func (suite *ScoreSuite) TearDownSuite() {
 }
 
+func (suite *ScoreSuite) SharedCountAPIKey() (string, bool, Issue) {
+	return lookupAPIKeyInEnv("score.ScoreSuite", SharedCountAPIKeyEnvVarName)
+}
+
 func (suite *ScoreSuite) TestScores() {
 	scoreURL, _ := url.Parse("https://www.cnbc.com/2019/03/18/bill-gates-says-he-talked-with-google-employees-about-ai-health-care.html")
 
@@ -39,6 +43,11 @@ func (suite *ScoreSuite) TestScores() {
 	suite.Nil(liErr, "There shouldn't be a LinkedIn API error")
 	suite.True(li.IsValid(), "There shouldn't be a LinkedIn API error")
 	suite.False(li.SharesCount() == -1, "LinkedIn shares count shouldn't be the default")
+
+	sharedCount, scErr := GetSharedCountLinkScoresForURL(suite, scoreURL, suite.keys, UseSharedCountAPI)
+	suite.Nil(scErr, "There shouldn't be a SharedCount API error")
+	suite.True(sharedCount.IsValid(), "SharedCount scores should be valid")
+	suite.True(sharedCount.SharesCount() > 0, "SharedCount score should be greater than zero")
 
 	aggregated := GetAggregatedLinkScores(scoreURL, suite.keys, -1, false)
 	suite.True(aggregated.IsValid(), "All scores should be valid")

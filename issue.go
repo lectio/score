@@ -7,6 +7,8 @@ const (
 	UnableToExecuteHTTPGETRequest    string = "SCORE_E-0200"
 	InvalidAPIRespHTTPStatusCode     string = "SCORE_E-0300"
 	UnableToReadBodyFromHTTPResponse string = "SCORE_E-0400"
+	APIErrorResponseFound            string = "SCORE_E-0500"
+	NoAPIKeyProvidedInCodeOrEnv      string = "SCORE_E-0600"
 )
 
 // Issue is a structured problem identification with context information
