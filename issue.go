@@ -9,6 +9,7 @@ const (
 	UnableToReadBodyFromHTTPResponse string = "SCORE_E-0400"
 	APIErrorResponseFound            string = "SCORE_E-0500"
 	NoAPIKeyProvidedInCodeOrEnv      string = "SCORE_E-0600"
+	SecretManagementError 		     string = "SCORE_E-0700"	
 )
 
 // Issue is a structured problem identification with context information
