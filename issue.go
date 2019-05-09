@@ -9,7 +9,7 @@ const (
 	UnableToReadBodyFromHTTPResponse string = "SCORE_E-0400"
 	APIErrorResponseFound            string = "SCORE_E-0500"
 	NoAPIKeyProvidedInCodeOrEnv      string = "SCORE_E-0600"
-	SecretManagementError 		     string = "SCORE_E-0700"	
+	SecretManagementError            string = "SCORE_E-0700"
 )
 
 // Issue is a structured problem identification with context information
@@ -36,7 +36,7 @@ type issue struct {
 	IsIssueAnError bool   `json:"isError"`
 }
 
-func newIssue(apiEndpoint string, code string, message string, isError bool) Issue {
+func NewIssue(apiEndpoint string, code string, message string, isError bool) Issue {
 	result := new(issue)
 	result.APIEndpoint = apiEndpoint
 	result.Code = code
@@ -45,7 +45,7 @@ func newIssue(apiEndpoint string, code string, message string, isError bool) Iss
 	return result
 }
 
-func newHTTPResponseIssue(apiEndpoint string, httpRespStatusCode int, message string, isError bool) Issue {
+func NewHTTPResponseIssue(apiEndpoint string, httpRespStatusCode int, message string, isError bool) Issue {
 	result := new(issue)
 	result.APIEndpoint = apiEndpoint
 	result.Code = fmt.Sprintf("%s-HTTP-%d", InvalidAPIRespHTTPStatusCode, httpRespStatusCode)

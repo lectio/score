@@ -30,22 +30,22 @@ func getHTTPResult(apiEndpoint string, userAgent string, timeout time.Duration) 
 	}
 	req, reqErr := http.NewRequest(http.MethodGet, apiEndpoint, nil)
 	if reqErr != nil {
-		return nil, newIssue(apiEndpoint, UnableToCreateHTTPRequest, fmt.Sprintf("Unable to create HTTP request: %v", reqErr), true)
+		return nil, NewIssue(apiEndpoint, UnableToCreateHTTPRequest, fmt.Sprintf("Unable to create HTTP request: %v", reqErr), true)
 	}
 	req.Header.Set("User-Agent", userAgent)
 	resp, getErr := httpClient.Do(req)
 	if getErr != nil {
-		return nil, newIssue(apiEndpoint, UnableToExecuteHTTPGETRequest, fmt.Sprintf("Unable to execute HTTP GET request: %v", getErr), true)
+		return nil, NewIssue(apiEndpoint, UnableToExecuteHTTPGETRequest, fmt.Sprintf("Unable to execute HTTP GET request: %v", getErr), true)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, newHTTPResponseIssue(apiEndpoint, resp.StatusCode, fmt.Sprintf("HTTP response status is not 200: %v", resp.StatusCode), true)
+		return nil, NewHTTPResponseIssue(apiEndpoint, resp.StatusCode, fmt.Sprintf("HTTP response status is not 200: %v", resp.StatusCode), true)
 	}
 
 	body, readErr := ioutil.ReadAll(resp.Body)
 	if readErr != nil {
-		return nil, newIssue(apiEndpoint, UnableToReadBodyFromHTTPResponse, fmt.Sprintf("Unable to read body from HTTP response: %v", readErr), true)
+		return nil, NewIssue(apiEndpoint, UnableToReadBodyFromHTTPResponse, fmt.Sprintf("Unable to read body from HTTP response: %v", readErr), true)
 	}
 
 	result.body = &body

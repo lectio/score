@@ -154,7 +154,7 @@ func GetSharedCountLinkScoresForURLText(creds SharedCountCredentials, url string
 	json.Unmarshal(*httpRes.body, result)
 
 	if len(result.ErrorFromAPICall) > 0 {
-		issue := newIssue(url, APIErrorResponseFound, fmt.Sprintf("SharedCount API returned an error: %q, %q, %d", result.ErrorFromAPICall, result.ErrorType, result.ErrorHTTPStatusCode), true)
+		issue := NewIssue(url, APIErrorResponseFound, fmt.Sprintf("SharedCount API returned an error: %q, %q, %d", result.ErrorFromAPICall, result.ErrorType, result.ErrorHTTPStatusCode), true)
 		result.IssuesFound = append(result.IssuesFound, issue)
 		return result
 	}

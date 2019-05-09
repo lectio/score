@@ -4,13 +4,13 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
 	"github.com/lectio/secret"
+	"github.com/stretchr/testify/suite"
 )
 
 type ScoreSuite struct {
 	suite.Suite
-	keys Keys
+	keys  Keys
 	vault secret.Vault
 }
 
@@ -30,7 +30,7 @@ func (suite *ScoreSuite) TearDownSuite() {
 func (suite *ScoreSuite) SharedCountAPIKey() (string, bool, Issue) {
 	apiKey, err := suite.vault.DecryptText("0d4af7674abbfa18d01510fc107318ace74175c5cae32b1e3dfb1ec37ee5ceb1c8253d880ba027ed3c8280883cef0152d447f068a21f0a793f83c552fd89703aeecd53d5")
 	if err != nil {
-		return "", false, newIssue("SharedCount.com", SecretManagementError, err.Error(), true)
+		return "", false, NewIssue("SharedCount.com", SecretManagementError, err.Error(), true)
 	}
 	return apiKey, true, nil
 }
