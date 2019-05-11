@@ -1,6 +1,7 @@
 package score
 
 import (
+	"net/http"
 	"net/url"
 )
 
@@ -19,7 +20,7 @@ type AggregatedLinkScores struct {
 }
 
 // GetAggregatedLinkScores returns a multiple scores structure
-func GetAggregatedLinkScores(url *url.URL, keys Keys, initialTotalCount int, simulate bool) *AggregatedLinkScores {
+func GetAggregatedLinkScores(url *url.URL, client *http.Client, keys Keys, initialTotalCount int, simulate bool) *AggregatedLinkScores {
 	result := new(AggregatedLinkScores)
 	result.MachineName = "aggregate"
 	result.HumanName = "Aggregate"
@@ -27,7 +28,7 @@ func GetAggregatedLinkScores(url *url.URL, keys Keys, initialTotalCount int, sim
 	result.URL = url.String()
 	result.GloballyUniqueKey = keys.PrimaryKeyForURL(url)
 
-	if fb, fbErr := GetFacebookLinkScoresForURL(url, keys, simulate); fbErr == nil {
+	if fb, fbErr := GetFacebookLinkScoresForURL(url, client, keys, simulate); fbErr == nil {
 		result.Scores = append(result.Scores, fb)
 		if fb.Issues() != nil {
 			for _, issue := range fb.Issues().ErrorsAndWarnings() {
@@ -35,7 +36,7 @@ func GetAggregatedLinkScores(url *url.URL, keys Keys, initialTotalCount int, sim
 			}
 		}
 	}
-	if li, liErr := GetLinkedInLinkScoresForURL(url, keys, simulate); liErr == nil {
+	if li, liErr := GetLinkedInLinkScoresForURL(url, client, keys, simulate); liErr == nil {
 		result.Scores = append(result.Scores, li)
 		if li.Issues() != nil {
 			for _, issue := range li.Issues().ErrorsAndWarnings() {

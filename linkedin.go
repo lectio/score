@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math/rand"
+	"net/http"
 	"net/url"
 )
 
@@ -98,7 +99,7 @@ func (li LinkedInLinkScores) HandleIssues(errorHandler func(Issue), warningHandl
 }
 
 // GetLinkedInLinkScoresForURLText takes a text URL to score and returns the LinkedIn share count
-func GetLinkedInLinkScoresForURLText(url string, keys Keys, simulateLinkedInAPI bool) *LinkedInLinkScores {
+func GetLinkedInLinkScoresForURLText(url string, client *http.Client, keys Keys, simulateLinkedInAPI bool) *LinkedInLinkScores {
 	apiEndpoint := "https://www.linkedin.com/countserv/count/share?format=json&url=" + url
 	result := new(LinkedInLinkScores)
 	result.MachineName = "linkedin"
@@ -111,7 +112,7 @@ func GetLinkedInLinkScoresForURLText(url string, keys Keys, simulateLinkedInAPI 
 		result.Count = rand.Intn(50)
 		return result
 	}
-	httpRes, issue := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)
+	httpRes, issue := getHTTPResult(apiEndpoint, client, HTTPUserAgent)
 	result.APIEndpoint = httpRes.apiEndpoint
 	if issue != nil {
 		result.IssuesFound = append(result.IssuesFound, issue)
@@ -122,9 +123,9 @@ func GetLinkedInLinkScoresForURLText(url string, keys Keys, simulateLinkedInAPI 
 }
 
 // GetLinkedInLinkScoresForURL takes a URL to score and returns the LinkedIn share count
-func GetLinkedInLinkScoresForURL(url *url.URL, keys Keys, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
+func GetLinkedInLinkScoresForURL(url *url.URL, client *http.Client, keys Keys, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetLinkedInLinkScoresForURL")
 	}
-	return GetLinkedInLinkScoresForURLText(url.String(), keys, simulateLinkedInAPI), nil
+	return GetLinkedInLinkScoresForURLText(url.String(), client, keys, simulateLinkedInAPI), nil
 }

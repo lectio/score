@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math/rand"
+	"net/http"
 	"net/url"
 )
 
@@ -129,7 +130,7 @@ type FacebookGraphOGObject struct {
 }
 
 // GetFacebookLinkScoresForURLText takes a text URL to score and returns the Facebook graph (and share counts)
-func GetFacebookLinkScoresForURLText(url string, keys Keys, simulateFacebookAPI bool) *FacebookLinkScores {
+func GetFacebookLinkScoresForURLText(url string, client *http.Client, keys Keys, simulateFacebookAPI bool) *FacebookLinkScores {
 	apiEndpoint := "https://graph.facebook.com/?id=" + url
 	result := new(FacebookLinkScores)
 	result.MachineName = "facebook"
@@ -144,7 +145,7 @@ func GetFacebookLinkScoresForURLText(url string, keys Keys, simulateFacebookAPI 
 		result.Shares.CommentCount = rand.Intn(2500)
 		return result
 	}
-	httpRes, issue := getHTTPResult(apiEndpoint, HTTPUserAgent, HTTPTimeout)
+	httpRes, issue := getHTTPResult(apiEndpoint, client, HTTPUserAgent)
 	result.APIEndpoint = httpRes.apiEndpoint
 	if issue != nil {
 		result.IssuesFound = append(result.IssuesFound, issue)
@@ -155,9 +156,9 @@ func GetFacebookLinkScoresForURLText(url string, keys Keys, simulateFacebookAPI 
 }
 
 // GetFacebookLinkScoresForURL takes a URL to score and returns the Facebook graph (and share counts)
-func GetFacebookLinkScoresForURL(url *url.URL, keys Keys, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
+func GetFacebookLinkScoresForURL(url *url.URL, client *http.Client, keys Keys, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetFacebookLinkScoresForURL")
 	}
-	return GetFacebookLinkScoresForURLText(url.String(), keys, simulateFacebookAPI), nil
+	return GetFacebookLinkScoresForURLText(url.String(), client, keys, simulateFacebookAPI), nil
 }

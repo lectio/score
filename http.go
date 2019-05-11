@@ -21,19 +21,16 @@ type httpResult struct {
 
 // GetHTTPResult runs the apiEndpoint and returns the body of the HTTP result
 // TODO: Consider using [HTTP Cache](https://github.com/gregjones/httpcache)
-func getHTTPResult(apiEndpoint string, userAgent string, timeout time.Duration) (*httpResult, Issue) {
+func getHTTPResult(apiEndpoint string, client *http.Client, userAgent string) (*httpResult, Issue) {
 	result := new(httpResult)
 	result.apiEndpoint = apiEndpoint
 
-	httpClient := http.Client{
-		Timeout: timeout,
-	}
 	req, reqErr := http.NewRequest(http.MethodGet, apiEndpoint, nil)
 	if reqErr != nil {
 		return nil, NewIssue(apiEndpoint, UnableToCreateHTTPRequest, fmt.Sprintf("Unable to create HTTP request: %v", reqErr), true)
 	}
 	req.Header.Set("User-Agent", userAgent)
-	resp, getErr := httpClient.Do(req)
+	resp, getErr := client.Do(req)
 	if getErr != nil {
 		return nil, NewIssue(apiEndpoint, UnableToExecuteHTTPGETRequest, fmt.Sprintf("Unable to execute HTTP GET request: %v", getErr), true)
 	}

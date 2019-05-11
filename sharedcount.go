@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"net/url"
 )
 
@@ -126,7 +127,7 @@ func (sc SharedCountLinkScores) HandleIssues(errorHandler func(Issue), warningHa
 }
 
 // GetSharedCountLinkScoresForURLText takes a text URL to score and returns the SharedCount share count
-func GetSharedCountLinkScoresForURLText(creds SharedCountCredentials, url string, keys Keys, simulateSharedCountAPI bool) *SharedCountLinkScores {
+func GetSharedCountLinkScoresForURLText(creds SharedCountCredentials, url string, client *http.Client, keys Keys, simulateSharedCountAPI bool) *SharedCountLinkScores {
 	result := new(SharedCountLinkScores)
 	result.MachineName = "SharedCount.com"
 	result.HumanName = "SharedCount.com"
@@ -145,7 +146,7 @@ func GetSharedCountLinkScoresForURLText(creds SharedCountCredentials, url string
 	}
 
 	result.APIEndpoint = fmt.Sprintf("https://api.sharedcount.com/v1.0/?url=%s&apikey=%s", url, apiKey)
-	httpRes, issue := getHTTPResult(result.APIEndpoint, HTTPUserAgent, HTTPTimeout)
+	httpRes, issue := getHTTPResult(result.APIEndpoint, client, HTTPUserAgent)
 	if issue != nil {
 		result.IssuesFound = append(result.IssuesFound, issue)
 		return result
@@ -169,9 +170,9 @@ func GetSharedCountLinkScoresForURLText(creds SharedCountCredentials, url string
 }
 
 // GetSharedCountLinkScoresForURL takes a URL to score and returns the SharedCount share count
-func GetSharedCountLinkScoresForURL(creds SharedCountCredentials, url *url.URL, keys Keys, simulateSharedCountAPI bool) (*SharedCountLinkScores, error) {
+func GetSharedCountLinkScoresForURL(creds SharedCountCredentials, url *url.URL, client *http.Client, keys Keys, simulateSharedCountAPI bool) (*SharedCountLinkScores, error) {
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetSharedCountLinkScoresForURL")
 	}
-	return GetSharedCountLinkScoresForURLText(creds, url.String(), keys, simulateSharedCountAPI), nil
+	return GetSharedCountLinkScoresForURLText(creds, url.String(), client, keys, simulateSharedCountAPI), nil
 }
