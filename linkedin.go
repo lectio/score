@@ -16,14 +16,13 @@ const UseLinkedInAPI = false
 
 // LinkedInLinkScores is the type-safe version of what LinkedIn's share count API returns
 type LinkedInLinkScores struct {
-	MachineName       string  `json:"scorer"`
-	HumanName         string  `json:"scorerName"`
-	Simulated         bool    `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
-	URL               string  `json:"url"`                   // part of lectio.score
-	GloballyUniqueKey string  `json:"uniqueKey"`             // part of lectio.score
-	APIEndpoint       string  `json:"apiEndPoint"`           // part of lectio.score
-	IssuesFound       []Issue `json:"issues"`                // part of lectio.score
-	Count             int     `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
+	MachineName string  `json:"scorer"`
+	HumanName   string  `json:"scorerName"`
+	Simulated   bool    `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
+	URL         string  `json:"url"`                   // part of lectio.score
+	APIEndpoint string  `json:"apiEndPoint"`           // part of lectio.score
+	IssuesFound []Issue `json:"issues"`                // part of lectio.score
+	Count       int     `json:"count"`                 // direct mapping to LinkedIn API result via Unmarshal httpRes.Body
 }
 
 // SourceID returns the name of the scoring engine
@@ -99,14 +98,13 @@ func (li LinkedInLinkScores) HandleIssues(errorHandler func(Issue), warningHandl
 }
 
 // GetLinkedInLinkScoresForURLText takes a text URL to score and returns the LinkedIn share count
-func GetLinkedInLinkScoresForURLText(url string, client *http.Client, keys Keys, simulateLinkedInAPI bool) *LinkedInLinkScores {
+func GetLinkedInLinkScoresForURLText(url string, client *http.Client, simulateLinkedInAPI bool) *LinkedInLinkScores {
 	apiEndpoint := "https://www.linkedin.com/countserv/count/share?format=json&url=" + url
 	result := new(LinkedInLinkScores)
 	result.MachineName = "linkedin"
 	result.HumanName = "LinkedIn"
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
-	result.GloballyUniqueKey = keys.PrimaryKeyForURLText(url)
 	if simulateLinkedInAPI {
 		result.Simulated = true
 		result.Count = rand.Intn(50)
@@ -123,9 +121,9 @@ func GetLinkedInLinkScoresForURLText(url string, client *http.Client, keys Keys,
 }
 
 // GetLinkedInLinkScoresForURL takes a URL to score and returns the LinkedIn share count
-func GetLinkedInLinkScoresForURL(url *url.URL, client *http.Client, keys Keys, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
+func GetLinkedInLinkScoresForURL(url *url.URL, client *http.Client, simulateLinkedInAPI bool) (*LinkedInLinkScores, error) {
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetLinkedInLinkScoresForURL")
 	}
-	return GetLinkedInLinkScoresForURLText(url.String(), client, keys, simulateLinkedInAPI), nil
+	return GetLinkedInLinkScoresForURLText(url.String(), client, simulateLinkedInAPI), nil
 }

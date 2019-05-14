@@ -12,14 +12,11 @@ import (
 type ScoreSuite struct {
 	suite.Suite
 	httpClient *http.Client
-	keys       Keys
 	vault      secret.Vault
 }
 
 func (suite *ScoreSuite) SetupSuite() {
 	suite.httpClient = &http.Client{Timeout: HTTPTimeout}
-
-	suite.keys = MakeDefaultKeys()
 
 	var vaultErr error
 	suite.vault, vaultErr = secret.Parse("env://LECTIO_VAULTPP_DEFAULT")
@@ -50,22 +47,22 @@ func (suite *ScoreSuite) TestScores() {
 	// http://buttons.reddit.com/button_info.json?url=https://www.cnbc.com/2019/03/18/bill-gates-says-he-talked-with-google-employees-about-ai-health-care.html
 	// http://www.linkedin.com/countserv/count/share?url=https://www.cnbc.com/2019/03/18/bill-gates-says-he-talked-with-google-employees-about-ai-health-care.html&format=json
 
-	fb, fbErr := GetFacebookLinkScoresForURL(scoreURL, suite.httpClient, suite.keys, UseFacebookAPI)
+	fb, fbErr := GetFacebookLinkScoresForURL(scoreURL, suite.httpClient, UseFacebookAPI)
 	suite.Nil(fbErr, "There shouldn't be a Facebook API error")
 	suite.True(fb.IsValid(), "There shouldn't be a Facebook API error")
 	suite.False(fb.SharesCount() == -1, "Facebook shares count shouldn't be the default")
 
-	li, liErr := GetLinkedInLinkScoresForURL(scoreURL, suite.httpClient, suite.keys, UseLinkedInAPI)
+	li, liErr := GetLinkedInLinkScoresForURL(scoreURL, suite.httpClient, UseLinkedInAPI)
 	suite.Nil(liErr, "There shouldn't be a LinkedIn API error")
 	suite.True(li.IsValid(), "There shouldn't be a LinkedIn API error")
 	suite.False(li.SharesCount() == -1, "LinkedIn shares count shouldn't be the default")
 
-	sharedCount, scErr := GetSharedCountLinkScoresForURL(suite, scoreURL, suite.httpClient, suite.keys, UseSharedCountAPI)
+	sharedCount, scErr := GetSharedCountLinkScoresForURL(suite, scoreURL, suite.httpClient, UseSharedCountAPI)
 	suite.Nil(scErr, "There shouldn't be a SharedCount API error")
 	suite.True(sharedCount.IsValid(), "SharedCount scores should be valid")
 	suite.True(sharedCount.SharesCount() > 0, "SharedCount score should be greater than zero")
 
-	aggregated := GetAggregatedLinkScores(scoreURL, suite.httpClient, suite.keys, -1, false)
+	aggregated := GetAggregatedLinkScores(scoreURL, suite.httpClient, -1, false)
 	suite.True(aggregated.IsValid(), "All scores should be valid")
 	suite.False(aggregated.SharesCount() == -1, "Aggregate count shouldn't be the default")
 }

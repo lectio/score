@@ -18,17 +18,16 @@ const UseFacebookAPI = false
 
 // FacebookLinkScores is the type-safe version of what Facebook API Graph returns
 type FacebookLinkScores struct {
-	MachineName       string                 `json:"scorer"`
-	HumanName         string                 `json:"scorerName"`
-	Simulated         bool                   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
-	URL               string                 `json:"url"`                   // part of lectio.score
-	GloballyUniqueKey string                 `json:"uniqueKey"`             // part of lectio.score
-	APIEndpoint       string                 `json:"apiEndPoint"`           // part of lectio.score
-	IssuesFound       []Issue                `json:"issues"`                // part of lectio.score
-	APIError          *FacebookGraphAPIError `json:"error,omitempty"`       // direct mapping to Facebook API result via Unmarshal httpRes.Body
-	ID                string                 `json:"id"`                    // direct mapping to Facebook API result via Unmarshal httpRes.Body
-	Shares            *FacebookGraphShares   `json:"share"`                 // direct mapping to Facebook API result via Unmarshal httpRes.Body
-	OpenGraph         *FacebookGraphOGObject `json:"og_object"`             // direct mapping to Facebook API result via Unmarshal httpRes.Body
+	MachineName string                 `json:"scorer"`
+	HumanName   string                 `json:"scorerName"`
+	Simulated   bool                   `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
+	URL         string                 `json:"url"`                   // part of lectio.score
+	APIEndpoint string                 `json:"apiEndPoint"`           // part of lectio.score
+	IssuesFound []Issue                `json:"issues"`                // part of lectio.score
+	APIError    *FacebookGraphAPIError `json:"error,omitempty"`       // direct mapping to Facebook API result via Unmarshal httpRes.Body
+	ID          string                 `json:"id"`                    // direct mapping to Facebook API result via Unmarshal httpRes.Body
+	Shares      *FacebookGraphShares   `json:"share"`                 // direct mapping to Facebook API result via Unmarshal httpRes.Body
+	OpenGraph   *FacebookGraphOGObject `json:"og_object"`             // direct mapping to Facebook API result via Unmarshal httpRes.Body
 }
 
 // SourceID returns the name of the scoring engine
@@ -130,14 +129,13 @@ type FacebookGraphOGObject struct {
 }
 
 // GetFacebookLinkScoresForURLText takes a text URL to score and returns the Facebook graph (and share counts)
-func GetFacebookLinkScoresForURLText(url string, client *http.Client, keys Keys, simulateFacebookAPI bool) *FacebookLinkScores {
+func GetFacebookLinkScoresForURLText(url string, client *http.Client, simulateFacebookAPI bool) *FacebookLinkScores {
 	apiEndpoint := "https://graph.facebook.com/?id=" + url
 	result := new(FacebookLinkScores)
 	result.MachineName = "facebook"
 	result.HumanName = "Facebook"
 	result.URL = url
 	result.APIEndpoint = apiEndpoint
-	result.GloballyUniqueKey = keys.PrimaryKeyForURLText(url)
 	if simulateFacebookAPI {
 		result.Simulated = simulateFacebookAPI
 		result.Shares = new(FacebookGraphShares)
@@ -156,9 +154,9 @@ func GetFacebookLinkScoresForURLText(url string, client *http.Client, keys Keys,
 }
 
 // GetFacebookLinkScoresForURL takes a URL to score and returns the Facebook graph (and share counts)
-func GetFacebookLinkScoresForURL(url *url.URL, client *http.Client, keys Keys, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
+func GetFacebookLinkScoresForURL(url *url.URL, client *http.Client, simulateFacebookAPI bool) (*FacebookLinkScores, error) {
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetFacebookLinkScoresForURL")
 	}
-	return GetFacebookLinkScoresForURLText(url.String(), client, keys, simulateFacebookAPI), nil
+	return GetFacebookLinkScoresForURLText(url.String(), client, simulateFacebookAPI), nil
 }

@@ -28,7 +28,6 @@ type SharedCountLinkScores struct {
 	HumanName           string                    `json:"scorerName"`
 	Simulated           bool                      `json:"isSimulated,omitempty"` // part of lectio.score, omitted if it's false
 	URL                 string                    `json:"url"`                   // part of lectio.score
-	GloballyUniqueKey   string                    `json:"uniqueKey"`             // part of lectio.score
 	APIEndpoint         string                    `json:"apiEndPoint"`           // part of lectio.score
 	IssuesFound         []Issue                   `json:"issues"`                // part of lectio.score
 	AggregatedScore     int                       `json:"aggregated_score"`      // part of lectio.score
@@ -127,12 +126,11 @@ func (sc SharedCountLinkScores) HandleIssues(errorHandler func(Issue), warningHa
 }
 
 // GetSharedCountLinkScoresForURLText takes a text URL to score and returns the SharedCount share count
-func GetSharedCountLinkScoresForURLText(creds SharedCountCredentials, url string, client *http.Client, keys Keys, simulateSharedCountAPI bool) *SharedCountLinkScores {
+func GetSharedCountLinkScoresForURLText(creds SharedCountCredentials, url string, client *http.Client, simulateSharedCountAPI bool) *SharedCountLinkScores {
 	result := new(SharedCountLinkScores)
 	result.MachineName = "SharedCount.com"
 	result.HumanName = "SharedCount.com"
 	result.URL = url
-	result.GloballyUniqueKey = keys.PrimaryKeyForURLText(url)
 	if simulateSharedCountAPI {
 		result.Simulated = true
 		result.AggregatedScore = rand.Intn(50)
@@ -170,9 +168,9 @@ func GetSharedCountLinkScoresForURLText(creds SharedCountCredentials, url string
 }
 
 // GetSharedCountLinkScoresForURL takes a URL to score and returns the SharedCount share count
-func GetSharedCountLinkScoresForURL(creds SharedCountCredentials, url *url.URL, client *http.Client, keys Keys, simulateSharedCountAPI bool) (*SharedCountLinkScores, error) {
+func GetSharedCountLinkScoresForURL(creds SharedCountCredentials, url *url.URL, client *http.Client, simulateSharedCountAPI bool) (*SharedCountLinkScores, error) {
 	if url == nil {
 		return nil, errors.New("Null URL passed to GetSharedCountLinkScoresForURL")
 	}
-	return GetSharedCountLinkScoresForURLText(creds, url.String(), client, keys, simulateSharedCountAPI), nil
+	return GetSharedCountLinkScoresForURLText(creds, url.String(), client, simulateSharedCountAPI), nil
 }
